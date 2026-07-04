@@ -1,6 +1,7 @@
 "use client";
 
 import { useGameStore } from "@/store/useGameStore";
+import { logout } from "@/lib/api";
 
 const XP_PER_RANK = 200;
 
@@ -25,7 +26,7 @@ export default function StatusBar({ world }: { world: string }) {
           style={{ background: "var(--terminal)" }}
         />
         <span className="glow-terminal font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
-          SQL RUNWAY 
+          GLOBAL DATA ACADEMY
         </span>
         <span
           className="hidden font-[family-name:var(--font-mono)] text-xs sm:inline"
@@ -74,6 +75,17 @@ export default function StatusBar({ world }: { world: string }) {
           style={{ color: "var(--text-lo)" }}
         >
           reset progress
+        </button>
+
+        <button
+          onClick={async () => {
+            await logout();
+            window.location.href = "/";
+          }}
+          className="hidden font-[family-name:var(--font-mono)] text-[11px] underline decoration-dotted sm:inline"
+          style={{ color: "var(--text-lo)" }}
+        >
+          sign out
         </button>
       </div>
     </header>
