@@ -7,6 +7,7 @@ const XP_PER_RANK = 200;
 export default function StatusBar({ world }: { world: string }) {
   const xp = useGameStore((s) => s.xp);
   const rank = useGameStore((s) => s.rank);
+  const resetProgress = useGameStore((s) => s.resetProgress);
   const pct = Math.min(100, Math.round(((xp % XP_PER_RANK) / XP_PER_RANK) * 100));
 
   return (
@@ -24,7 +25,7 @@ export default function StatusBar({ world }: { world: string }) {
           style={{ background: "var(--terminal)" }}
         />
         <span className="font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
-          GLOBAL DATA ACADEMY
+          SQL RUNWAY 
         </span>
         <span
           className="hidden font-[family-name:var(--font-mono)] text-xs sm:inline"
@@ -62,6 +63,18 @@ export default function StatusBar({ world }: { world: string }) {
             {xp} XP
           </span>
         </div>
+
+        <button
+          onClick={() => {
+            if (confirm("Reset all saved progress? This cannot be undone.")) {
+              resetProgress();
+            }
+          }}
+          className="hidden font-[family-name:var(--font-mono)] text-[11px] underline decoration-dotted sm:inline"
+          style={{ color: "var(--text-lo)" }}
+        >
+          reset progress
+        </button>
       </div>
     </header>
   );
