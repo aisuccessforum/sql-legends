@@ -15,5 +15,8 @@
       "database_name": "sql-legends-db",
       "database_id": "7d9d3704-158b-40b4-9081-3caa892cebaa"
     }
-  ]
+  ],
+  "vars": {
+    "GOOGLE_CLIENT_ID": "138937795182-38atebq5h8ah25ui45s1uku5o81g0lml.apps.googleusercontent.com"
+  }
 }
