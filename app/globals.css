@@ -29,10 +29,13 @@ body {
   color: var(--text-hi);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  min-height: 100%;
 }
 
-/* Faint scanline / grid texture on the void background — ambient, not decorative noise */
+/* Layered atmosphere: faint grid + two soft color glows + a vignette that
+   darkens the edges so the void never reads as "empty," just deep. */
 body {
+  background-color: var(--void);
   background-image:
     linear-gradient(var(--console-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--console-line) 1px, transparent 1px);
@@ -40,15 +43,55 @@ body {
   background-position: center;
   background-attachment: fixed;
   position: relative;
+  opacity: 1;
 }
 
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 140, 248, 0.06), transparent 60%);
+  background:
+    radial-gradient(ellipse 70% 50% at 15% -10%, rgba(124, 140, 248, 0.14), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 100% 110%, rgba(67, 242, 160, 0.09), transparent 60%),
+    radial-gradient(ellipse 120% 80% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* A slow scanline sweep for ambient "live terminal" motion — subtle enough
+   to sit in the background rather than distract from the game. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(124, 140, 248, 0.05) 45%,
+    rgba(124, 140, 248, 0.09) 50%,
+    rgba(124, 140, 248, 0.05) 55%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  animation: scanline-sweep 14s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+
+@keyframes scanline-sweep {
+  0% {
+    background-position: 0 -120%;
+  }
+  100% {
+    background-position: 0 120%;
+  }
+}
+
+#__next,
+body > div {
+  position: relative;
+  z-index: 1;
 }
 
 ::selection {
@@ -72,7 +115,8 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .blink-cursor::after {
+  .blink-cursor::after,
+  body::after {
     animation: none;
   }
   * {
@@ -92,4 +136,26 @@ body::before {
 .console-scroll::-webkit-scrollbar-thumb {
   background: var(--console-line);
   border-radius: 4px;
+}
+
+/* Elevated card treatment for the main dossier/terminal panels — replaces
+   flat edge-to-edge rectangles with a bordered, glowing console unit. */
+.console-card {
+  border-radius: 14px;
+  border: 1px solid var(--console-line);
+  background: linear-gradient(180deg, rgba(22, 32, 47, 0.9), rgba(18, 26, 41, 0.9));
+  box-shadow:
+    0 0 0 1px rgba(124, 140, 248, 0.05),
+    0 30px 80px -30px rgba(124, 140, 248, 0.25),
+    0 10px 30px -15px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+}
+
+/* Soft glow behind key headings/labels — cheap way to make the display
+   typeface feel like it belongs on a terminal HUD rather than a webpage. */
+.glow-terminal {
+  text-shadow: 0 0 18px rgba(67, 242, 160, 0.35);
+}
+.glow-clearance {
+  text-shadow: 0 0 16px rgba(124, 140, 248, 0.4);
 }

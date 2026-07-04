@@ -61,7 +61,13 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
   }
 
   return (
-    <section className="flex h-full flex-col gap-4 overflow-y-auto console-scroll p-5 sm:p-6">
+    <section
+      className="flex h-full flex-col gap-4 overflow-y-auto console-scroll p-6 sm:p-8"
+      style={{
+        background:
+          "linear-gradient(200deg, rgba(67, 242, 160, 0.035), transparent 40%)",
+      }}
+    >
       {/* Schema chips */}
       <div>
         <div
@@ -96,7 +102,7 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
           QUERY EDITOR
         </div>
         <div
-          className="flex overflow-hidden rounded-lg border"
+          className="flex overflow-hidden rounded-lg border transition-shadow focus-within:shadow-[0_0_0_1px_var(--terminal),0_0_24px_-8px_rgba(67,242,160,0.5)]"
           style={{ borderColor: "var(--console-line)", background: "var(--console-raised)" }}
         >
           <div
@@ -122,8 +128,11 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
         <button
           onClick={handleRun}
           disabled={status === "running"}
-          className="rounded-md px-4 py-2 font-[family-name:var(--font-display)] text-sm font-semibold tracking-wide transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: "var(--terminal)", color: "var(--void)" }}
+          className="rounded-md px-5 py-2.5 font-[family-name:var(--font-display)] text-sm font-semibold tracking-wide transition-all hover:brightness-110 hover:shadow-[0_0_28px_-6px_rgba(67,242,160,0.65)] disabled:opacity-50"
+          style={{
+            background: "linear-gradient(135deg, var(--terminal), var(--terminal-dim))",
+            color: "var(--void)",
+          }}
         >
           {status === "running" ? "EXECUTING..." : "EXECUTE QUERY"}
         </button>
@@ -198,7 +207,13 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
               </thead>
               <tbody>
                 {result.rows.map((row, i) => (
-                  <tr key={i}>
+                  <tr
+                    key={i}
+                    style={{
+                      background: i % 2 === 1 ? "rgba(255,255,255,0.02)" : "transparent",
+                    }}
+                    className="transition-colors hover:bg-white/[0.04]"
+                  >
                     {row.map((cell, j) => (
                       <td
                         key={j}

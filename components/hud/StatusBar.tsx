@@ -24,7 +24,7 @@ export default function StatusBar({ world }: { world: string }) {
           className="h-2 w-2 rounded-full"
           style={{ background: "var(--terminal)" }}
         />
-        <span className="font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
+        <span className="glow-terminal font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
           SQL RUNWAY 
         </span>
         <span
