@@ -1,14 +1,13 @@
 "use client";
 
 import { useGameStore } from "@/store/useGameStore";
-import { logout } from "@/lib/api";
+import AccountMenu from "@/components/hud/AccountMenu";
 
 const XP_PER_RANK = 200;
 
 export default function StatusBar({ world }: { world: string }) {
   const xp = useGameStore((s) => s.xp);
   const rank = useGameStore((s) => s.rank);
-  const resetProgress = useGameStore((s) => s.resetProgress);
   const pct = Math.min(100, Math.round(((xp % XP_PER_RANK) / XP_PER_RANK) * 100));
 
   return (
@@ -65,28 +64,7 @@ export default function StatusBar({ world }: { world: string }) {
           </span>
         </div>
 
-        <button
-          onClick={() => {
-            if (confirm("Reset all saved progress? This cannot be undone.")) {
-              resetProgress();
-            }
-          }}
-          className="hidden font-[family-name:var(--font-mono)] text-[11px] underline decoration-dotted sm:inline"
-          style={{ color: "var(--text-lo)" }}
-        >
-          reset progress
-        </button>
-
-        <button
-          onClick={async () => {
-            await logout();
-            window.location.href = "/";
-          }}
-          className="hidden font-[family-name:var(--font-mono)] text-[11px] underline decoration-dotted sm:inline"
-          style={{ color: "var(--text-lo)" }}
-        >
-          sign out
-        </button>
+        <AccountMenu />
       </div>
     </header>
   );
