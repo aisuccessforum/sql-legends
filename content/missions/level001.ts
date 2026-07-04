@@ -19,10 +19,10 @@ export const level001: Mission = {
   id: "intern-world01-level001",
   world: "Data Academy",
   levelLabel: "Orientation // Level 1",
-  npc: "DIRECTOR OKAFOR",
+  npc: "DIRECTOR MALHOTRA",
   briefing: [
     "Your boarding pass gets you as far as the lobby. No further.",
-    "A woman in a grey blazer is waiting by the turnstile. She doesn't introduce herself — the badge on her desk later will: DIRECTOR OKAFOR, GLOBAL DATA ACADEMY.",
+    "A woman in a grey blazer is waiting by the turnstile. She doesn't introduce herself — the badge on her desk later will: DIRECTOR MALHOTRA, GLOBAL DATA ACADEMY.",
     "\"Every intern class loses people in the first hour,\" she says, \"not because the work is hard. Because they're afraid to just look at the data.\"",
     "She taps the terminal. A single table appears: INTERNS.",
     "\"Before you touch anything else in this building, you need to know who's actually here. Pull every intern whose status is active. Nothing else. That's the whole job.\"",
@@ -40,14 +40,14 @@ export const level001: Mission = {
       (1, 'Priya Nair', 'Retail Kingdom', 'active'),
       (2, 'Marcus Webb', 'Banking District', 'on_leave'),
       (3, 'Sofia Reyes', 'Hospital Network', 'active'),
-      (4, 'Tomasz Kowalski', 'Airport Operations', 'terminated'),
-      (5, 'Amara Diallo', 'Cyber Security Center', 'active');
+      (4, 'Arjun Kapoor', 'Airport Operations', 'terminated'),
+      (5, 'Ananya Iyer', 'Cyber Security Center', 'active');
   `,
   schemaPreview: [
     { table: "interns", columns: ["id", "name", "division", "status"] },
   ],
   expectedColumns: ["name"],
-  expectedRows: [["Priya Nair"], ["Sofia Reyes"], ["Amara Diallo"]],
+  expectedRows: [["Priya Nair"], ["Sofia Reyes"], ["Ananya Iyer"]],
   requireRowOrder: false,
   hints: [
     "You only need one column back: name.",
