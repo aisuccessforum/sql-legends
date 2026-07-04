@@ -2,8 +2,18 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "sql-legends",
   "compatibility_date": "2026-07-04",
+  "main": "worker/index.ts",
   "assets": {
     "directory": "./out",
-    "not_found_handling": "404-page"
-  }
+    "not_found_handling": "404-page",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sql-legends-db",
+      "database_id": "7d9d3704-158b-40b4-9081-3caa892cebaa"
+    }
+  ]
 }

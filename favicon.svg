@@ -1,0 +1,32 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1420"/>
+      <stop offset="100%" stop-color="#080c14"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34f5b0"/>
+      <stop offset="100%" stop-color="#1fd9a0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#1c2836" stroke-width="1.5"/>
+
+  <!-- runway strip -->
+  <rect x="8" y="46" width="48" height="4" rx="2" fill="#182333"/>
+  <rect x="12" y="47.3" width="6" height="1.4" fill="#2c3a4d"/>
+  <rect x="23" y="47.3" width="6" height="1.4" fill="#2c3a4d"/>
+  <rect x="34" y="47.3" width="6" height="1.4" fill="#2c3a4d"/>
+  <rect x="45" y="47.3" width="6" height="1.4" fill="#2c3a4d"/>
+
+  <!-- terminal prompt chevron ">" as a runway/ascent path -->
+  <path d="M14 18 L30 32 L14 46" fill="none" stroke="url(#mint)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- underscore / cursor -->
+  <rect x="36" y="39" width="16" height="6" rx="1.5" fill="url(#mint)"/>
+
+  <!-- small glow dot (status indicator, echoes site header dot) -->
+  <circle cx="52" cy="14" r="4" fill="url(#mint)"/>
+</svg>
