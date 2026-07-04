@@ -37,7 +37,17 @@ export async function runMissionQuery(
   seedSql: string,
   playerQuery: string
 ): Promise<RunOutcome> {
-  const SQL = await loadSqlJs();
+  let SQL: SqlJsStatic;
+  try {
+    SQL = await loadSqlJs();
+  } catch (err) {
+    return {
+      ok: false,
+      results: [],
+      error: `Failed to load the SQL engine: ${(err as Error).message}`,
+    };
+  }
+
   const db: Database = new SQL.Database();
 
   try {

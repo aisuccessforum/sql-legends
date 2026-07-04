@@ -25,30 +25,38 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
     setStatus("running");
     setErrorMsg("");
 
-    const outcome = await runMissionQuery(mission.seedSql, query);
+    try {
+      const outcome = await runMissionQuery(mission.seedSql, query);
 
-    if (!outcome.ok) {
+      if (!outcome.ok) {
+        setStatus("error");
+        setErrorMsg(outcome.error ?? "Query failed.");
+        setResult(undefined);
+        return;
+      }
+
+      const first = outcome.results[0];
+      setResult(first);
+
+      const correct = resultsMatch(
+        first,
+        mission.expectedColumns,
+        mission.expectedRows,
+        mission.requireRowOrder
+      );
+
+      if (correct) {
+        setStatus("success");
+        completeMission(mission.id, mission.xpAward);
+      } else {
+        setStatus("wrong");
+      }
+    } catch (err) {
       setStatus("error");
-      setErrorMsg(outcome.error ?? "Query failed.");
+      setErrorMsg(
+        `Unexpected error: ${err instanceof Error ? err.message : String(err)}`
+      );
       setResult(undefined);
-      return;
-    }
-
-    const first = outcome.results[0];
-    setResult(first);
-
-    const correct = resultsMatch(
-      first,
-      mission.expectedColumns,
-      mission.expectedRows,
-      mission.requireRowOrder
-    );
-
-    if (correct) {
-      setStatus("success");
-      completeMission(mission.id, mission.xpAward);
-    } else {
-      setStatus("wrong");
     }
   }
 
