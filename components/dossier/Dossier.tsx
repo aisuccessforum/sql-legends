@@ -25,18 +25,18 @@ export default function Dossier({ mission }: { mission: Mission }) {
         >
           CLASSIFIED // {mission.levelLabel.toUpperCase()}
         </div>
-        <h1 className="glow-clearance font-[family-name:var(--font-display)] text-2xl font-semibold sm:text-3xl">
+        <h1 className="glow-clearance font-[family-name:var(--font-display)] text-3xl font-bold sm:text-4xl lg:text-5xl">
           {mission.world}
         </h1>
         <div
-          className="mt-1.5 font-[family-name:var(--font-mono)] text-xs"
+          className="mt-2 font-[family-name:var(--font-mono)] text-xs tracking-wide sm:text-sm"
           style={{ color: "var(--text-lo)" }}
         >
           FROM: {mission.npc}
         </div>
       </div>
 
-      <div className="space-y-3.5 text-[15px] leading-[1.7] sm:text-base">
+      <div className="space-y-4 text-base leading-[1.7] sm:text-lg lg:text-xl">
         {doneLines.map((line, i) => (
           <p key={i} style={{ color: "var(--text-hi)" }}>
             {line}
@@ -51,7 +51,7 @@ export default function Dossier({ mission }: { mission: Mission }) {
 
       {isComplete && (
         <div
-          className="mt-2 rounded-lg border px-4 py-3.5"
+          className="mt-2 rounded-lg border px-5 py-4"
           style={{
             borderColor: "var(--dossier)",
             background: "rgba(242, 178, 78, 0.07)",
@@ -59,12 +59,12 @@ export default function Dossier({ mission }: { mission: Mission }) {
           }}
         >
           <div
-            className="mb-1 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.14em]"
+            className="mb-1.5 font-[family-name:var(--font-mono)] text-xs tracking-[0.14em]"
             style={{ color: "var(--dossier)" }}
           >
             OBJECTIVE
           </div>
-          <p className="text-[15px] sm:text-base">{mission.objective}</p>
+          <p className="text-base sm:text-lg">{mission.objective}</p>
         </div>
       )}
     </section>

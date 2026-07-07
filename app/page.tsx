@@ -107,12 +107,11 @@ export default function Home() {
 
         {view === "mission" && activeMission && (
           <div className="w-full max-w-6xl">
-            <button
-              onClick={() => setView("dashboard")}
-              className="mb-4 font-[family-name:var(--font-mono)] text-xs underline decoration-dotted"
-              style={{ color: "var(--text-lo)" }}
-            >
-              ← back to ticket queue
+            <button onClick={() => setView("dashboard")} className="btn-chunky mb-5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Ticket Queue
             </button>
 
             <div className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2">

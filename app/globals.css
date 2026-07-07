@@ -141,8 +141,8 @@ body > div {
 /* Elevated card treatment for the main dossier/terminal panels — replaces
    flat edge-to-edge rectangles with a bordered, glowing console unit. */
 .console-card {
-  border-radius: 14px;
-  border: 1px solid var(--console-line);
+  border-radius: 16px;
+  border: 2px solid var(--console-line);
   background: linear-gradient(180deg, rgba(22, 32, 47, 0.9), rgba(18, 26, 41, 0.9));
   box-shadow:
     0 0 0 1px rgba(124, 140, 248, 0.05),
@@ -158,4 +158,49 @@ body > div {
 }
 .glow-clearance {
   text-shadow: 0 0 16px rgba(124, 140, 248, 0.4);
+}
+
+/* A real button, not a text link — used anywhere the old dotted-underline
+   links used to sit (back navigation, secondary actions). */
+.btn-chunky {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 2px solid var(--console-line);
+  background: var(--console-raised);
+  padding: 0.55rem 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-hi);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-chunky:hover {
+  border-color: var(--clearance);
+  box-shadow: 0 0 20px -6px rgba(124, 140, 248, 0.6);
+  transform: translateX(-3px);
+}
+.btn-chunky:active {
+  transform: translateX(-1px) scale(0.97);
+}
+
+/* Pulsing glow for "this is available right now" signals — a small,
+   deliberate dopamine cue rather than a static badge. */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(67, 242, 160, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(67, 242, 160, 0.9);
+  }
+}
+.pulse-badge {
+  animation: pulse-glow 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-badge {
+    animation: none;
+  }
 }

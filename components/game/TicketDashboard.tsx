@@ -47,10 +47,10 @@ export default function TicketDashboard({
         >
           INTERNSHIP PROGRAM // TICKET QUEUE
         </div>
-        <h1 className="glow-clearance font-[family-name:var(--font-display)] text-2xl font-semibold sm:text-3xl">
+        <h1 className="glow-clearance font-[family-name:var(--font-display)] text-3xl font-bold sm:text-4xl lg:text-5xl">
           Your Assignments
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-lo)" }}>
+        <p className="mt-2 text-sm sm:text-base" style={{ color: "var(--text-lo)" }}>
           {completedCount} of {missions.length} tickets reviewed
         </p>
       </div>
@@ -114,31 +114,29 @@ function TicketCard({
     <button
       onClick={onClick}
       disabled={locked}
-      className="console-card flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-all"
+      className="console-card flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-all"
       style={{
         opacity: locked ? 0.45 : 1,
         cursor: locked ? "not-allowed" : "pointer",
         borderColor: available ? "var(--clearance)" : "var(--console-line)",
-        boxShadow: available
-          ? "0 0 24px -10px rgba(124, 140, 248, 0.5)"
-          : undefined,
+        boxShadow: available ? "0 0 28px -8px rgba(124, 140, 248, 0.55)" : undefined,
       }}
     >
       <div className="min-w-0">
         <div
-          className="mb-1 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.12em]"
+          className="mb-1.5 font-[family-name:var(--font-mono)] text-xs tracking-[0.1em] sm:text-sm"
           style={{ color: completed ? "var(--terminal)" : "var(--dossier)" }}
         >
           {mission.levelLabel.toUpperCase()}
         </div>
-        <div className="truncate font-[family-name:var(--font-display)] text-sm font-semibold sm:text-base">
+        <div className="truncate font-[family-name:var(--font-display)] text-lg font-bold sm:text-xl">
           {mission.world}
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-3">
         <span
-          className="font-[family-name:var(--font-mono)] text-xs"
+          className="font-[family-name:var(--font-mono)] text-sm font-semibold"
           style={{ color: "var(--text-lo)" }}
         >
           +{mission.xpAward} XP
@@ -147,7 +145,7 @@ function TicketCard({
         {locked && <LockIcon />}
         {available && (
           <span
-            className="rounded-full px-2.5 py-1 font-[family-name:var(--font-mono)] text-[10px] font-semibold tracking-wide"
+            className="pulse-badge rounded-full px-3 py-1.5 font-[family-name:var(--font-mono)] text-xs font-bold tracking-wide"
             style={{ background: "var(--terminal)", color: "var(--void)" }}
           >
             OPEN

@@ -12,32 +12,32 @@ export default function StatusBar({ world }: { world: string }) {
 
   return (
     <header
-      className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b px-4 py-3 sm:px-6"
+      className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b-2 px-4 py-4 sm:px-6"
       style={{
         background: "rgba(10, 13, 20, 0.85)",
         borderColor: "var(--console-line)",
         backdropFilter: "blur(6px)",
       }}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <span
-          className="h-2 w-2 rounded-full"
+          className="h-2.5 w-2.5 rounded-full"
           style={{ background: "var(--terminal)" }}
         />
-        <span className="glow-terminal font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
+        <span className="glow-terminal font-[family-name:var(--font-display)] text-sm font-bold tracking-[0.14em] text-[var(--text-hi)] sm:text-base lg:text-lg">
           ASTRAMIND ANALYTICS
         </span>
         <span
-          className="hidden font-[family-name:var(--font-mono)] text-xs sm:inline"
+          className="hidden font-[family-name:var(--font-mono)] text-sm sm:inline"
           style={{ color: "var(--text-lo)" }}
         >
           / {world}
         </span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 sm:gap-4">
         <span
-          className="rounded-full border px-2.5 py-1 font-[family-name:var(--font-mono)] text-[11px] tracking-wide"
+          className="rounded-full border-2 px-3 py-1.5 font-[family-name:var(--font-mono)] text-xs font-semibold tracking-wide"
           style={{
             borderColor: "var(--clearance)",
             color: "var(--clearance)",
@@ -46,19 +46,23 @@ export default function StatusBar({ world }: { world: string }) {
           RANK: {rank.toUpperCase()}
         </span>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <div
-            className="h-1.5 w-24 overflow-hidden rounded-full sm:w-32"
+            className="h-2.5 w-24 overflow-hidden rounded-full sm:w-36"
             style={{ background: "var(--console-line)" }}
           >
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${pct}%`, background: "var(--clearance)" }}
+              style={{
+                width: `${pct}%`,
+                background: "var(--clearance)",
+                boxShadow: "0 0 10px rgba(124, 140, 248, 0.7)",
+              }}
             />
           </div>
           <span
-            className="font-[family-name:var(--font-mono)] text-xs"
-            style={{ color: "var(--text-lo)" }}
+            className="font-[family-name:var(--font-mono)] text-sm font-semibold"
+            style={{ color: "var(--text-hi)" }}
           >
             {xp} XP
           </span>
