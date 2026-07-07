@@ -22,9 +22,9 @@ export const level001: Mission = {
   npc: "TEAM LEAD MALHOTRA",
   briefing: [
     "08:45 AM. Internal system. Priority: Medium.",
-    "Your badge gets you as far as the intern floor. Team Lead Malhotra doesn't do small talk — she pulls up a single table on the shared terminal: EMPLOYEES.",
+    "Your badge gets you as far as the intern floor. Team Lead Malhotra doesn't do small talk - she pulls up a single table on the shared terminal: EMPLOYEES.",
     "\"Before we touch a single client file, HR needs a clean internal headcount. Every new hire this quarter, verified.\"",
-    "\"Most interns lose confidence in the first week — not because the work is hard, because they're afraid to just look at the data.\"",
+    "\"Most interns lose confidence in the first week - not because the work is hard, because they're afraid to just look at the data.\"",
     "\"Pull every employee whose status is active. Nothing else. That's ticket one.\"",
   ],
   objective: "Select the name of every employee whose status is 'active'.",
@@ -51,7 +51,7 @@ export const level001: Mission = {
   requireRowOrder: false,
   hints: [
     "You only need one column back: name.",
-    "Filter rows with WHERE — you're looking for status = 'active'.",
+    "Filter rows with WHERE - you're looking for status = 'active'.",
     "Try: SELECT name FROM employees WHERE status = 'active';",
   ],
   xpAward: 50,
