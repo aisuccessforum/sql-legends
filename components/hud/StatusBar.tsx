@@ -25,7 +25,7 @@ export default function StatusBar({ world }: { world: string }) {
           style={{ background: "var(--terminal)" }}
         />
         <span className="glow-terminal font-[family-name:var(--font-display)] text-xs font-semibold tracking-[0.18em] text-[var(--text-hi)] sm:text-sm">
-          GLOBAL DATA ACADEMY
+          ASTRAMIND ANALYTICS
         </span>
         <span
           className="hidden font-[family-name:var(--font-mono)] text-xs sm:inline"

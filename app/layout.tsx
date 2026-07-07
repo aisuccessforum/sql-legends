@@ -21,18 +21,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SQL Legends — Global Data Academy",
+  title: "AstraMind Analytics — Internship Portal",
   description:
-    "Learn SQL from Intern to Analytics Consultant inside a browser-based story RPG. Real queries, real databases, zero fluff.",
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/favicon-180.png", sizes: "180x180", type: "image/png" }],
-  },
+    "Complete your data analytics internship at AstraMind Analytics. Real client tickets, real SQL, zero fluff.",
 };
 
 export default function RootLayout({

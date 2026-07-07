@@ -16,35 +16,35 @@ export interface Mission {
 }
 
 export const level001: Mission = {
-  id: "intern-world01-level001",
-  world: "Data Academy",
-  levelLabel: "Orientation // Level 1",
-  npc: "DIRECTOR MALHOTRA",
+  id: "intern-ticket-001",
+  world: "AstraMind Analytics",
+  levelLabel: "Ticket INT-001 // Priority: Medium",
+  npc: "TEAM LEAD MALHOTRA",
   briefing: [
-    "Your boarding pass gets you as far as the lobby. No further.",
-    "A woman in a grey blazer is waiting by the turnstile. She doesn't introduce herself — the badge on her desk later will: DIRECTOR MALHOTRA, GLOBAL DATA ACADEMY.",
-    "\"Every intern class loses people in the first hour,\" she says, \"not because the work is hard. Because they're afraid to just look at the data.\"",
-    "She taps the terminal. A single table appears: INTERNS.",
-    "\"Before you touch anything else in this building, you need to know who's actually here. Pull every intern whose status is active. Nothing else. That's the whole job.\"",
+    "08:45 AM. Internal system. Priority: Medium.",
+    "Your badge gets you as far as the intern floor. Team Lead Malhotra doesn't do small talk — she pulls up a single table on the shared terminal: EMPLOYEES.",
+    "\"Before we touch a single client file, HR needs a clean internal headcount. Every new hire this quarter, verified.\"",
+    "\"Most interns lose confidence in the first week — not because the work is hard, because they're afraid to just look at the data.\"",
+    "\"Pull every employee whose status is active. Nothing else. That's ticket one.\"",
   ],
-  objective: "Select the name of every intern whose status is 'active'.",
-  schemaLabel: "interns",
+  objective: "Select the name of every employee whose status is 'active'.",
+  schemaLabel: "employees",
   seedSql: `
-    CREATE TABLE interns (
+    CREATE TABLE employees (
       id INTEGER PRIMARY KEY,
       name TEXT,
-      division TEXT,
+      department TEXT,
       status TEXT
     );
-    INSERT INTO interns (id, name, division, status) VALUES
-      (1, 'Priya Nair', 'Retail Kingdom', 'active'),
-      (2, 'Marcus Webb', 'Banking District', 'on_leave'),
-      (3, 'Sofia Reyes', 'Hospital Network', 'active'),
-      (4, 'Arjun Kapoor', 'Airport Operations', 'terminated'),
-      (5, 'Ananya Iyer', 'Cyber Security Center', 'active');
+    INSERT INTO employees (id, name, department, status) VALUES
+      (1, 'Priya Nair', 'Data Analytics', 'active'),
+      (2, 'Marcus Webb', 'Business Intelligence', 'on_leave'),
+      (3, 'Sofia Reyes', 'Data Engineering', 'active'),
+      (4, 'Arjun Kapoor', 'Dashboard Development', 'terminated'),
+      (5, 'Ananya Iyer', 'Business Consulting', 'active');
   `,
   schemaPreview: [
-    { table: "interns", columns: ["id", "name", "division", "status"] },
+    { table: "employees", columns: ["id", "name", "department", "status"] },
   ],
   expectedColumns: ["name"],
   expectedRows: [["Priya Nair"], ["Sofia Reyes"], ["Ananya Iyer"]],
@@ -52,7 +52,7 @@ export const level001: Mission = {
   hints: [
     "You only need one column back: name.",
     "Filter rows with WHERE — you're looking for status = 'active'.",
-    "Try: SELECT name FROM interns WHERE status = 'active';",
+    "Try: SELECT name FROM employees WHERE status = 'active';",
   ],
   xpAward: 50,
 };
