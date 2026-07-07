@@ -9,16 +9,21 @@ import SqlTerminal from "@/components/terminal/SqlTerminal";
 import LandingPage from "@/components/auth/LandingPage";
 import OnboardingForm from "@/components/auth/OnboardingForm";
 import ProgressSync from "@/components/game/ProgressSync";
-import { level001 } from "@/content/missions/level001";
+import TicketDashboard from "@/components/game/TicketDashboard";
+import ComingSoon from "@/components/game/ComingSoon";
+import type { Mission } from "@/content/missions/level001";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
 type AuthState = "loading" | "signed-out" | "onboarding" | "ready";
+type View = "dashboard" | "mission" | "coming-soon";
 
 export default function Home() {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [email, setEmail] = useState("");
   const [booted, setBooted] = useState(false);
+  const [view, setView] = useState<View>("dashboard");
+  const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
 
@@ -78,29 +83,60 @@ export default function Home() {
     return <BootSequence onDone={() => setBooted(true)} />;
   }
 
+  const hudWorld =
+    view === "mission" && activeMission
+      ? activeMission.world
+      : view === "coming-soon"
+        ? "Upcoming Modules"
+        : "Ticket Dashboard";
+
   return (
     <div className="flex min-h-screen flex-col">
-      <StatusBar world={level001.world} />
+      <StatusBar world={hudWorld} />
 
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:py-12">
-        <div className="w-full max-w-6xl">
-          <div className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2">
-            <div
-              className="border-b md:border-b-0 md:border-r"
-              style={{ borderColor: "var(--console-line)" }}
-            >
-              <Dossier mission={level001} />
-            </div>
-            <SqlTerminal mission={level001} />
-          </div>
+        {view === "dashboard" && (
+          <TicketDashboard
+            onSelectMission={(mission) => {
+              setActiveMission(mission);
+              setView("mission");
+            }}
+            onSelectComingSoon={() => setView("coming-soon")}
+          />
+        )}
 
-          <p
-            className="mt-6 text-center font-[family-name:var(--font-mono)] text-[11px] tracking-[0.14em]"
-            style={{ color: "var(--text-lo)" }}
-          >
-            GLOBAL DATA ACADEMY // SECURE CONNECTION ESTABLISHED
-          </p>
-        </div>
+        {view === "mission" && activeMission && (
+          <div className="w-full max-w-6xl">
+            <button
+              onClick={() => setView("dashboard")}
+              className="mb-4 font-[family-name:var(--font-mono)] text-xs underline decoration-dotted"
+              style={{ color: "var(--text-lo)" }}
+            >
+              ← back to ticket queue
+            </button>
+
+            <div className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2">
+              <div
+                className="border-b md:border-b-0 md:border-r"
+                style={{ borderColor: "var(--console-line)" }}
+              >
+                <Dossier mission={activeMission} />
+              </div>
+              <SqlTerminal mission={activeMission} />
+            </div>
+
+            <p
+              className="mt-6 text-center font-[family-name:var(--font-mono)] text-[11px] tracking-[0.14em]"
+              style={{ color: "var(--text-lo)" }}
+            >
+              ASTRAMIND ANALYTICS // SECURE CONNECTION ESTABLISHED
+            </p>
+          </div>
+        )}
+
+        {view === "coming-soon" && (
+          <ComingSoon onBack={() => setView("dashboard")} />
+        )}
       </main>
 
       <XpToast />
