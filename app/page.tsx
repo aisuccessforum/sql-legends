@@ -12,6 +12,7 @@ import ProgressSync from "@/components/game/ProgressSync";
 import TicketDashboard from "@/components/game/TicketDashboard";
 import ComingSoon from "@/components/game/ComingSoon";
 import type { Mission } from "@/content/missions/level001";
+import { missions } from "@/content/missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
@@ -26,6 +27,7 @@ export default function Home() {
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
+  const completedMissions = useGameStore((s) => s.completedMissions);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,12 +109,53 @@ export default function Home() {
 
         {view === "mission" && activeMission && (
           <div className="w-full max-w-6xl">
-            <button onClick={() => setView("dashboard")} className="btn-chunky mb-5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              Ticket Queue
-            </button>
+            {(() => {
+              const isDone = completedMissions.includes(activeMission.id);
+              const activeIndex = missions.findIndex(
+                (m) => m.id === activeMission.id
+              );
+              const nextMission =
+                activeIndex >= 0 && activeIndex < missions.length - 1
+                  ? missions[activeIndex + 1]
+                  : null;
+
+              return (
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    onClick={() => setView("dashboard")}
+                    className="btn-chunky"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Ticket Queue
+                  </button>
+
+                  {isDone && nextMission && (
+                    <button
+                      onClick={() => setActiveMission(nextMission)}
+                      className="btn-chunky pulse-badge"
+                      style={{ borderColor: "var(--terminal)", color: "var(--terminal)" }}
+                    >
+                      Next Ticket
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  )}
+
+                  {isDone && !nextMission && (
+                    <button
+                      onClick={() => setView("coming-soon")}
+                      className="btn-chunky"
+                      style={{ borderColor: "var(--dossier)", color: "var(--dossier)" }}
+                    >
+                      More Tickets Coming Soon
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2">
               <div

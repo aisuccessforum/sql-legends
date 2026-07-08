@@ -8,7 +8,7 @@ export const level003: Mission = {
   briefing: [
     "10:02 AM. Internal system. Priority: Medium.",
     "\"HR flagged something. We've got someone terminated still showing up in a few shared reports. I need everyone who is NOT terminated, so we can compare it against the list going out today.\"",
-    "\"You already know how to match a value. This time I want the opposite — everyone who doesn't match.\"",
+    "\"You already know how to match a value. This time I want the opposite - everyone who doesn't match.\"",
   ],
   objective: "Select the name of every employee whose status is not 'terminated'.",
   schemaLabel: "employees",
@@ -40,8 +40,8 @@ export const level003: Mission = {
   ],
   requireRowOrder: false,
   hints: [
-    "You're filtering again, just like last time — but for everyone who DOESN'T match a value.",
-    "SQL's \"not equal to\" operator is != (some people write <> instead — both work in SQLite).",
+    "You're filtering again, just like last time - but for everyone who DOESN'T match a value.",
+    "SQL's \"not equal to\" operator is != (some people write <> instead - both work in SQLite).",
     "Try: SELECT name FROM employees WHERE status != 'terminated';",
   ],
   xpAward: 50,

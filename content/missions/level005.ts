@@ -8,7 +8,7 @@ export const level005: Mission = {
   briefing: [
     "01:15 PM. Internal system. Priority: High.",
     "\"Last one before you're off internal tickets and onto real client data. Leadership wants a one-line status check: every active employee, name and status side by side, nothing else.\"",
-    "\"This is everything you've done today — picking your columns, and filtering your rows — in the same query. If you can do this cleanly, you're ready for a client file.\"",
+    "\"This is everything you've done today - picking your columns, and filtering your rows - in the same query. If you can do this cleanly, you're ready for a client file.\"",
   ],
   objective:
     "Select the name and status of every employee whose status is 'active'.",

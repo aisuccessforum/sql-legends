@@ -7,7 +7,7 @@ export const level002: Mission = {
   npc: "TEAM LEAD MALHOTRA",
   briefing: [
     "09:10 AM. Internal system. Priority: Low.",
-    "\"Good, you're back. Payroll needs a directory export — just names and departments, nothing else. They don't want status, they don't want IDs. Give them exactly what they asked for, not everything you've got.\"",
+    "\"Good, you're back. Payroll needs a directory export - just names and departments, nothing else. They don't want status, they don't want IDs. Give them exactly what they asked for, not everything you've got.\"",
     "\"New rule for you: never dump a whole table if you weren't asked for one. Pull only the columns you need.\"",
   ],
   objective: "Select the name and department of every employee.",
@@ -41,7 +41,7 @@ export const level002: Mission = {
   ],
   requireRowOrder: false,
   hints: [
-    "You don't need every column — just two of them.",
+    "You don't need every column - just two of them.",
     "List the exact columns you want, separated by a comma, right after SELECT.",
     "Try: SELECT name, department FROM employees;",
   ],

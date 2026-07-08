@@ -8,7 +8,7 @@ export const level004: Mission = {
   briefing: [
     "11:20 AM. Internal system. Priority: Medium.",
     "\"Data Analytics is getting a new project lead next week, and they want a headcount first. Everyone currently sitting in that department, by name.\"",
-    "\"You've filtered on status before. This time filter on department instead — same idea, different column.\"",
+    "\"You've filtered on status before. This time filter on department instead - same idea, different column.\"",
   ],
   objective: "Select the name of every employee in the 'Data Analytics' department.",
   schemaLabel: "employees",
@@ -34,7 +34,7 @@ export const level004: Mission = {
   expectedRows: [["Priya Nair"], ["Rohan Verma"]],
   requireRowOrder: false,
   hints: [
-    "Same structure as filtering by status — just point WHERE at a different column.",
+    "Same structure as filtering by status - just point WHERE at a different column.",
     "You're matching an exact department name, so it still needs quotes: 'Data Analytics'.",
     "Try: SELECT name FROM employees WHERE department = 'Data Analytics';",
   ],
