@@ -74,6 +74,11 @@ import { level072 } from "./level072";
 import { level073 } from "./level073";
 import { level074 } from "./level074";
 import { level075 } from "./level075";
+import { level076 } from "./level076";
+import { level077 } from "./level077";
+import { level078 } from "./level078";
+import { level079 } from "./level079";
+import { level080 } from "./level080";
 
 /**
  * Every mission, in the exact order players unlock them. Add new
@@ -156,10 +161,16 @@ export const missions: Mission[] = [
   level073,
   level074,
   level075,
+  level076,
+  level077,
+  level078,
+  level079,
+  level080,
 ];
 
 /**
- * Modules from the curriculum that don't have written tickets yet.
- * Shown as locked "coming soon" cards below the real ticket queue.
+ * All 80 Intern-rank tickets are now written. This stays empty until
+ * Junior Data Analyst content begins — at that point, add those module
+ * names here so the dashboard shows them as "coming soon."
  */
-export const upcomingModules: string[] = ["Final Internship Assessment"];
+export const upcomingModules: string[] = [];
