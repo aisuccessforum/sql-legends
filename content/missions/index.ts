@@ -34,6 +34,26 @@ import { level032 } from "./level032";
 import { level033 } from "./level033";
 import { level034 } from "./level034";
 import { level035 } from "./level035";
+import { level036 } from "./level036";
+import { level037 } from "./level037";
+import { level038 } from "./level038";
+import { level039 } from "./level039";
+import { level040 } from "./level040";
+import { level041 } from "./level041";
+import { level042 } from "./level042";
+import { level043 } from "./level043";
+import { level044 } from "./level044";
+import { level045 } from "./level045";
+import { level046 } from "./level046";
+import { level047 } from "./level047";
+import { level048 } from "./level048";
+import { level049 } from "./level049";
+import { level050 } from "./level050";
+import { level051 } from "./level051";
+import { level052 } from "./level052";
+import { level053 } from "./level053";
+import { level054 } from "./level054";
+import { level055 } from "./level055";
 
 /**
  * Every mission, in the exact order players unlock them. Add new
@@ -76,6 +96,26 @@ export const missions: Mission[] = [
   level033,
   level034,
   level035,
+  level036,
+  level037,
+  level038,
+  level039,
+  level040,
+  level041,
+  level042,
+  level043,
+  level044,
+  level045,
+  level046,
+  level047,
+  level048,
+  level049,
+  level050,
+  level051,
+  level052,
+  level053,
+  level054,
+  level055,
 ];
 
 /**
@@ -83,8 +123,6 @@ export const missions: Mission[] = [
  * Shown as locked "coming soon" cards below the real ticket queue.
  */
 export const upcomingModules: string[] = [
-  "Team Performance",
-  "Client Quality Checks",
   "Cross-Team Reporting",
   "Client Readiness Assessment",
   "Final Internship Assessment",
