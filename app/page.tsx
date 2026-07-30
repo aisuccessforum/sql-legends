@@ -157,7 +157,15 @@ export default function Home() {
               );
             })()}
 
-            <div className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2">
+            {/* key={activeMission.id} forces a fresh remount of Dossier and
+                SqlTerminal on every mission change — without this, React
+                reuses the same component instances and leftover state
+                (typed query, results, hints shown) carries over from the
+                previous ticket instead of resetting. */}
+            <div
+              key={activeMission.id}
+              className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2"
+            >
               <div
                 className="border-b md:border-b-0 md:border-r"
                 style={{ borderColor: "var(--console-line)" }}
