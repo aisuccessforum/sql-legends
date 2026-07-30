@@ -11,6 +11,8 @@ export interface PlayerProfile {
   coins: number;
   completedMissions: string[];
   onboardingComplete: boolean;
+  certificateNumber: string | null;
+  certifiedAt: number | null;
 }
 
 export interface OnboardingFields {
@@ -19,6 +21,15 @@ export interface OnboardingFields {
   country: string;
   state: string;
   city: string;
+}
+
+export interface PublicCertificate {
+  certificateNumber: string;
+  displayName: string | null;
+  country: string | null;
+  state: string | null;
+  city: string | null;
+  certifiedAt: number;
 }
 
 /** Returns the signed-in player's profile, or null if not signed in. */
@@ -72,4 +83,19 @@ export function beaconSyncProgress(progress: {
 
 export async function logout(): Promise<void> {
   await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+}
+
+/**
+ * Public lookup — no auth required, since this powers a shareable
+ * certificate link. Returns null if the number doesn't exist.
+ */
+export async function getCertificate(
+  certificateNumber: string
+): Promise<PublicCertificate | null> {
+  const res = await fetch(
+    `/api/certificate/${encodeURIComponent(certificateNumber)}`
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Failed to load certificate (${res.status})`);
+  return res.json();
 }

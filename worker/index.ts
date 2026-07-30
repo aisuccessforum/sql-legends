@@ -1,7 +1,9 @@
 import { clearCookie, parseCookies, serializeCookie } from "./cookies";
 import {
+  checkAndIssueCertificate,
   completeOnboarding,
   ensurePlayerExists,
+  getCertificateByNumber,
   getPlayer,
   rowToProfile,
   syncProgress,
@@ -13,6 +15,7 @@ import {
   SESSION_MAX_AGE,
   verifySessionToken,
 } from "./session";
+import { missions } from "../content/missions";
 
 export interface Env {
   DB: D1Database;
@@ -22,6 +25,11 @@ export interface Env {
 }
 
 const STATE_COOKIE_NAME = "sl_oauth_state";
+
+// The full set of ticket IDs that must be completed to earn the Intern
+// certificate. Derived from the same registry the game itself uses, so
+// this can never drift out of sync with what's actually playable.
+const REQUIRED_CERTIFICATE_MISSION_IDS = missions.map((m) => m.id);
 
 function json(data: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -182,7 +190,33 @@ const worker = {
         rank: body.rank,
         completedMissions: body.completedMissions,
       });
+
+      // Fires on every sync but is a no-op once a certificate already
+      // exists — cheap enough not to worry about, and guarantees the
+      // certificate appears the moment the 80th ticket is actually saved.
+      await checkAndIssueCertificate(
+        env.DB,
+        playerId,
+        body.completedMissions,
+        REQUIRED_CERTIFICATE_MISSION_IDS
+      );
+
       return json({ ok: true });
+    }
+
+    // --- Public certificate lookup (no auth — this is a shareable link) ---
+    if (path.startsWith("/api/certificate/") && request.method === "GET") {
+      const certificateNumber = decodeURIComponent(
+        path.slice("/api/certificate/".length)
+      );
+      if (!certificateNumber) {
+        return json({ error: "Missing certificate number" }, { status: 400 });
+      }
+      const cert = await getCertificateByNumber(env.DB, certificateNumber);
+      if (!cert) {
+        return json({ error: "Certificate not found" }, { status: 404 });
+      }
+      return json(cert);
     }
 
     return json({ error: "Not found" }, { status: 404 });

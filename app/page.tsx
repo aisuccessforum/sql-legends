@@ -47,6 +47,8 @@ export default function Home() {
           rank: profile.rank,
           xp: profile.xp,
           completedMissions: profile.completedMissions,
+          certificateNumber: profile.certificateNumber,
+          certifiedAt: profile.certifiedAt,
         });
         setAuthState("ready");
       })
@@ -61,6 +63,8 @@ export default function Home() {
       rank: profile.rank,
       xp: profile.xp,
       completedMissions: profile.completedMissions,
+      certificateNumber: profile.certificateNumber,
+      certifiedAt: profile.certifiedAt,
     });
     setAuthState("ready");
   }
@@ -157,11 +161,6 @@ export default function Home() {
               );
             })()}
 
-            {/* key={activeMission.id} forces a fresh remount of Dossier and
-                SqlTerminal on every mission change — without this, React
-                reuses the same component instances and leftover state
-                (typed query, results, hints shown) carries over from the
-                previous ticket instead of resetting. */}
             <div
               key={activeMission.id}
               className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2"

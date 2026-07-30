@@ -7,10 +7,14 @@ interface GameState {
   xp: number;
   completedMissions: string[];
   lastAward: number | null;
+  certificateNumber: string | null;
+  certifiedAt: number | null;
   seedFromProfile: (profile: {
     rank: string;
     xp: number;
     completedMissions: string[];
+    certificateNumber?: string | null;
+    certifiedAt?: number | null;
   }) => void;
   completeMission: (missionId: string, xpAward: number) => void;
   clearLastAward: () => void;
@@ -23,12 +27,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   xp: 0,
   completedMissions: [],
   lastAward: null,
+  certificateNumber: null,
+  certifiedAt: null,
 
   seedFromProfile: (profile) =>
     set({
       rank: profile.rank,
       xp: profile.xp,
       completedMissions: profile.completedMissions,
+      certificateNumber: profile.certificateNumber ?? null,
+      certifiedAt: profile.certifiedAt ?? null,
       ready: true,
     }),
 
@@ -43,8 +51,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       lastAward: xpAward,
     });
 
-    // Instant local cache — the debounced server sync (see ProgressSync)
-    // is what actually reaches the database.
     void writeSave({
       rank: get().rank,
       xp: nextXp,
@@ -57,6 +63,5 @@ export const useGameStore = create<GameState>((set, get) => ({
   resetProgress: async () => {
     await clearSave();
     set({ rank: "Intern", xp: 0, completedMissions: [], lastAward: null });
-    // The next debounced sync tick will push this reset up to the server too.
   },
 }));
