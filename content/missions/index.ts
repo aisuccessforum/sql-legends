@@ -64,6 +64,16 @@ import { level062 } from "./level062";
 import { level063 } from "./level063";
 import { level064 } from "./level064";
 import { level065 } from "./level065";
+import { level066 } from "./level066";
+import { level067 } from "./level067";
+import { level068 } from "./level068";
+import { level069 } from "./level069";
+import { level070 } from "./level070";
+import { level071 } from "./level071";
+import { level072 } from "./level072";
+import { level073 } from "./level073";
+import { level074 } from "./level074";
+import { level075 } from "./level075";
 
 /**
  * Every mission, in the exact order players unlock them. Add new
@@ -136,13 +146,20 @@ export const missions: Mission[] = [
   level063,
   level064,
   level065,
+  level066,
+  level067,
+  level068,
+  level069,
+  level070,
+  level071,
+  level072,
+  level073,
+  level074,
+  level075,
 ];
 
 /**
  * Modules from the curriculum that don't have written tickets yet.
  * Shown as locked "coming soon" cards below the real ticket queue.
  */
-export const upcomingModules: string[] = [
-  "Client Readiness Assessment",
-  "Final Internship Assessment",
-];
+export const upcomingModules: string[] = ["Final Internship Assessment"];
