@@ -54,6 +54,16 @@ import { level052 } from "./level052";
 import { level053 } from "./level053";
 import { level054 } from "./level054";
 import { level055 } from "./level055";
+import { level056 } from "./level056";
+import { level057 } from "./level057";
+import { level058 } from "./level058";
+import { level059 } from "./level059";
+import { level060 } from "./level060";
+import { level061 } from "./level061";
+import { level062 } from "./level062";
+import { level063 } from "./level063";
+import { level064 } from "./level064";
+import { level065 } from "./level065";
 
 /**
  * Every mission, in the exact order players unlock them. Add new
@@ -116,6 +126,16 @@ export const missions: Mission[] = [
   level053,
   level054,
   level055,
+  level056,
+  level057,
+  level058,
+  level059,
+  level060,
+  level061,
+  level062,
+  level063,
+  level064,
+  level065,
 ];
 
 /**
@@ -123,7 +143,6 @@ export const missions: Mission[] = [
  * Shown as locked "coming soon" cards below the real ticket queue.
  */
 export const upcomingModules: string[] = [
-  "Cross-Team Reporting",
   "Client Readiness Assessment",
   "Final Internship Assessment",
 ];
