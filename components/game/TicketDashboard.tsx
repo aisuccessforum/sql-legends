@@ -1,7 +1,8 @@
 "use client";
 
 import type { Mission } from "@/content/missions/level001";
-import { missions, upcomingModules } from "@/content/missions";
+import { missions } from "@/content/missions";
+import { juniorMissions, juniorUpcomingModules } from "@/content/junior-missions";
 import { useGameStore } from "@/store/useGameStore";
 
 type TicketStatus = "completed" | "available" | "locked";
@@ -17,12 +18,20 @@ export default function TicketDashboard({
 }: Props) {
   const completedMissions = useGameStore((s) => s.completedMissions);
   const certificateNumber = useGameStore((s) => s.certificateNumber);
+  const rank = useGameStore((s) => s.rank);
 
-  const firstIncompleteIndex = missions.findIndex(
+  const isJunior = rank === "Junior Data Analyst";
+  const activeMissions = isJunior ? juniorMissions : missions;
+  const activeUpcomingModules = isJunior ? juniorUpcomingModules : [];
+  const eyebrow = isJunior
+    ? "JUNIOR DATA ANALYST // TICKET QUEUE"
+    : "INTERNSHIP PROGRAM // TICKET QUEUE";
+
+  const firstIncompleteIndex = activeMissions.findIndex(
     (m) => !completedMissions.includes(m.id)
   );
 
-  const items = missions.map((mission, index) => {
+  const items = activeMissions.map((mission, index) => {
     const isDone = completedMissions.includes(mission.id);
     let status: TicketStatus;
     if (isDone) {
@@ -35,7 +44,7 @@ export default function TicketDashboard({
     return { mission, status };
   });
 
-  const completedCount = missions.filter((m) =>
+  const completedCount = activeMissions.filter((m) =>
     completedMissions.includes(m.id)
   ).length;
 
@@ -75,13 +84,15 @@ export default function TicketDashboard({
           className="mb-1 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.16em]"
           style={{ color: "var(--dossier)" }}
         >
-          INTERNSHIP PROGRAM // TICKET QUEUE
+          {eyebrow}
         </div>
         <h1 className="glow-clearance font-[family-name:var(--font-display)] text-2xl font-bold sm:text-3xl lg:text-5xl">
           Your Assignments
         </h1>
         <p className="mt-2 text-sm sm:text-base" style={{ color: "var(--text-lo)" }}>
-          {completedCount} of {missions.length} tickets reviewed
+          {activeMissions.length > 0
+            ? `${completedCount} of ${activeMissions.length} tickets reviewed`
+            : "No tickets published for this rank yet."}
         </p>
       </div>
 
@@ -98,7 +109,7 @@ export default function TicketDashboard({
         ))}
       </div>
 
-      {upcomingModules.length > 0 && (
+      {activeUpcomingModules.length > 0 && (
         <div className="mt-10">
           <div
             className="mb-3 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.16em]"
@@ -107,7 +118,7 @@ export default function TicketDashboard({
             UPCOMING MODULES
           </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {upcomingModules.map((name) => (
+            {activeUpcomingModules.map((name) => (
               <button
                 key={name}
                 onClick={onSelectComingSoon}

@@ -190,9 +190,9 @@ export async function checkAndIssueCertificate(
   const certifiedAt = Date.now();
   await db
     .prepare(
-      `UPDATE players SET certificate_number = ?, certified_at = ?, updated_at = ? WHERE id = ?`
+      `UPDATE players SET certificate_number = ?, certified_at = ?, rank = ?, updated_at = ? WHERE id = ?`
     )
-    .bind(certificateNumber, certifiedAt, certifiedAt, playerId)
+    .bind(certificateNumber, certifiedAt, "Junior Data Analyst", certifiedAt, playerId)
     .run();
 
   return { certificateNumber, certifiedAt };

@@ -13,6 +13,7 @@ import TicketDashboard from "@/components/game/TicketDashboard";
 import ComingSoon from "@/components/game/ComingSoon";
 import type { Mission } from "@/content/missions/level001";
 import { missions } from "@/content/missions";
+import { juniorMissions } from "@/content/junior-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
@@ -115,12 +116,15 @@ export default function Home() {
           <div className="w-full max-w-6xl">
             {(() => {
               const isDone = completedMissions.includes(activeMission.id);
-              const activeIndex = missions.findIndex(
+              const track = missions.some((m) => m.id === activeMission.id)
+                ? missions
+                : juniorMissions;
+              const activeIndex = track.findIndex(
                 (m) => m.id === activeMission.id
               );
               const nextMission =
-                activeIndex >= 0 && activeIndex < missions.length - 1
-                  ? missions[activeIndex + 1]
+                activeIndex >= 0 && activeIndex < track.length - 1
+                  ? track[activeIndex + 1]
                   : null;
 
               return (
