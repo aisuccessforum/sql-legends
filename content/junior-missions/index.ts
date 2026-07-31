@@ -33,6 +33,16 @@ import { junior031 } from "./junior031";
 import { junior032 } from "./junior032";
 import { junior033 } from "./junior033";
 import { junior034 } from "./junior034";
+import { junior035 } from "./junior035";
+import { junior036 } from "./junior036";
+import { junior037 } from "./junior037";
+import { junior038 } from "./junior038";
+import { junior039 } from "./junior039";
+import { junior040 } from "./junior040";
+import { junior041 } from "./junior041";
+import { junior042 } from "./junior042";
+import { junior043 } from "./junior043";
+import { junior044 } from "./junior044";
 
 /**
  * Junior Data Analyst rank missions, in unlock order. Populated module by
@@ -75,12 +85,21 @@ export const juniorMissions: Mission[] = [
   junior032,
   junior033,
   junior034,
+  junior035,
+  junior036,
+  junior037,
+  junior038,
+  junior039,
+  junior040,
+  junior041,
+  junior042,
+  junior043,
+  junior044,
 ];
 
 /**
  * Module names not yet built, shown as locked "coming soon" cards.
  */
 export const juniorUpcomingModules: string[] = [
-  "Advanced Joins",
   "Junior Analyst Capstone Assessment",
 ];
