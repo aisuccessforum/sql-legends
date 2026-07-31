@@ -10,7 +10,6 @@ export default function ProgressSync() {
   const xp = useGameStore((s) => s.xp);
   const rank = useGameStore((s) => s.rank);
   const completedMissions = useGameStore((s) => s.completedMissions);
-  const certificateNumber = useGameStore((s) => s.certificateNumber);
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
 
   // Always-current snapshot for the close/hide handlers, so they never
@@ -25,26 +24,25 @@ export default function ProgressSync() {
     const timeout = setTimeout(async () => {
       await syncProgress(latest.current);
 
-      // The server may have just issued a certificate as a side effect
-      // of this sync (e.g. this was the 80th completed ticket). The
-      // local store has no way to know that on its own, so re-fetch
-      // once — only when we don't already have one, so this never
-      // fires on every routine sync.
-      if (!certificateNumber) {
-        const profile = await getProfile();
-        if (profile?.certificateNumber) {
-          seedFromProfile({
-            rank: profile.rank,
-            xp: profile.xp,
-            completedMissions: profile.completedMissions,
-            certificateNumber: profile.certificateNumber,
-            certifiedAt: profile.certifiedAt,
-          });
-        }
+      // The sync may have just triggered a promotion (a new certificate,
+      // an advanced rank) as a side effect on the server. Always refetch
+      // afterward rather than guessing whether one happened — this is the
+      // only way to correctly catch every milestone in a career that now
+      // has more than one, not just the first.
+      const profile = await getProfile();
+      if (profile) {
+        seedFromProfile({
+          rank: profile.rank,
+          xp: profile.xp,
+          completedMissions: profile.completedMissions,
+          certificateNumber: profile.certificateNumber,
+          certifiedAt: profile.certifiedAt,
+          certificates: profile.certificates,
+        });
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timeout);
-  }, [xp, rank, completedMissions, certificateNumber, seedFromProfile]);
+  }, [xp, rank, completedMissions, seedFromProfile]);
 
   // Last-chance sync when the tab is hidden or closed. sendBeacon fires
   // reliably even as the page unloads, unlike a normal fetch.

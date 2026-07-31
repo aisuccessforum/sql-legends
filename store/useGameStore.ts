@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { clearSave, writeSave } from "@/lib/db";
 
+interface CertificateInfo {
+  certificateNumber: string;
+  rankName: string;
+  issuedAt: number;
+}
+
 interface GameState {
   ready: boolean;
   rank: string;
@@ -9,12 +15,14 @@ interface GameState {
   lastAward: number | null;
   certificateNumber: string | null;
   certifiedAt: number | null;
+  certificates: CertificateInfo[];
   seedFromProfile: (profile: {
     rank: string;
     xp: number;
     completedMissions: string[];
     certificateNumber?: string | null;
     certifiedAt?: number | null;
+    certificates?: CertificateInfo[];
   }) => void;
   completeMission: (missionId: string, xpAward: number) => void;
   clearLastAward: () => void;
@@ -29,6 +37,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastAward: null,
   certificateNumber: null,
   certifiedAt: null,
+  certificates: [],
 
   seedFromProfile: (profile) =>
     set({
@@ -37,6 +46,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       completedMissions: profile.completedMissions,
       certificateNumber: profile.certificateNumber ?? null,
       certifiedAt: profile.certifiedAt ?? null,
+      certificates: profile.certificates ?? [],
       ready: true,
     }),
 

@@ -50,6 +50,7 @@ export default function Home() {
           completedMissions: profile.completedMissions,
           certificateNumber: profile.certificateNumber,
           certifiedAt: profile.certifiedAt,
+          certificates: profile.certificates,
         });
         setAuthState("ready");
       })
@@ -66,6 +67,7 @@ export default function Home() {
       completedMissions: profile.completedMissions,
       certificateNumber: profile.certificateNumber,
       certifiedAt: profile.certifiedAt,
+      certificates: profile.certificates,
     });
     setAuthState("ready");
   }

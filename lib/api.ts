@@ -13,6 +13,7 @@ export interface PlayerProfile {
   onboardingComplete: boolean;
   certificateNumber: string | null;
   certifiedAt: number | null;
+  certificates: { certificateNumber: string; rankName: string; issuedAt: number }[];
 }
 
 export interface OnboardingFields {
@@ -25,6 +26,7 @@ export interface OnboardingFields {
 
 export interface PublicCertificate {
   certificateNumber: string;
+  rankName: string;
   displayName: string | null;
   country: string | null;
   state: string | null;

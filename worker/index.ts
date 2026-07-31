@@ -1,12 +1,14 @@
 import { clearCookie, parseCookies, serializeCookie } from "./cookies";
 import {
-  checkAndIssueCertificate,
+  checkAndIssuePromotion,
   completeOnboarding,
   ensurePlayerExists,
   getCertificateByNumber,
+  getCertificatesForPlayer,
   getPlayer,
   rowToProfile,
   syncProgress,
+  type PromotionMilestone,
 } from "./db";
 import { buildGoogleAuthUrl, exchangeCodeForTokens, verifyGoogleIdToken } from "./google";
 import {
@@ -16,6 +18,7 @@ import {
   verifySessionToken,
 } from "./session";
 import { missions } from "../content/missions";
+import { juniorMissions } from "../content/junior-missions";
 
 export interface Env {
   DB: D1Database;
@@ -26,10 +29,22 @@ export interface Env {
 
 const STATE_COOKIE_NAME = "sl_oauth_state";
 
-// The full set of ticket IDs that must be completed to earn the Intern
-// certificate. Derived from the same registry the game itself uses, so
-// this can never drift out of sync with what's actually playable.
-const REQUIRED_CERTIFICATE_MISSION_IDS = missions.map((m) => m.id);
+// Every career milestone, checked in order on every sync. Each one is
+// idempotent, so re-checking an already-achieved milestone is a cheap
+// no-op. Adding a future rank (e.g. Data Analyst -> Senior Data Analyst)
+// is just one more entry here once that content exists.
+const PROMOTION_MILESTONES: PromotionMilestone[] = [
+  {
+    rankName: "Intern",
+    requiredMissionIds: missions.map((m) => m.id),
+    nextRank: "Junior Data Analyst",
+  },
+  {
+    rankName: "Junior Data Analyst",
+    requiredMissionIds: juniorMissions.map((m) => m.id),
+    nextRank: "Data Analyst",
+  },
+];
 
 function json(data: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -128,7 +143,8 @@ const worker = {
 
       const row = await getPlayer(env.DB, playerId);
       if (!row) return json({ error: "Player not found" }, { status: 404 });
-      return json(rowToProfile(row));
+      const certificates = await getCertificatesForPlayer(env.DB, playerId);
+      return json(rowToProfile(row, certificates));
     }
 
     // --- Complete onboarding ---
@@ -163,7 +179,8 @@ const worker = {
       });
 
       const row = await getPlayer(env.DB, playerId);
-      return json(rowToProfile(row!));
+      const certificates = await getCertificatesForPlayer(env.DB, playerId);
+      return json(rowToProfile(row!, certificates));
     }
 
     // --- Sync in-game progress (debounced calls + sendBeacon on tab close) ---
@@ -185,21 +202,23 @@ const worker = {
         return json({ error: "Invalid progress payload" }, { status: 400 });
       }
 
+      // Note: rank is intentionally NOT taken from the client here — it's
+      // only ever advanced by the server-side promotion check below, so
+      // a player can never spoof their own rank by editing the request.
       await syncProgress(env.DB, playerId, {
         xp: body.xp,
         rank: body.rank,
         completedMissions: body.completedMissions,
       });
 
-      // Fires on every sync but is a no-op once a certificate already
-      // exists — cheap enough not to worry about, and guarantees the
-      // certificate appears the moment the 80th ticket is actually saved.
-      await checkAndIssueCertificate(
-        env.DB,
-        playerId,
-        body.completedMissions,
-        REQUIRED_CERTIFICATE_MISSION_IDS
-      );
+      for (const milestone of PROMOTION_MILESTONES) {
+        await checkAndIssuePromotion(
+          env.DB,
+          playerId,
+          body.completedMissions,
+          milestone
+        );
+      }
 
       return json({ ok: true });
     }

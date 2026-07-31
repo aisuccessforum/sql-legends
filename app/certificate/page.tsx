@@ -4,6 +4,11 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getCertificate, type PublicCertificate } from "@/lib/api";
 
+function programLabelForRank(rankName: string): string {
+  if (rankName === "Intern") return "Data Analytics Internship Program";
+  return `${rankName} Certification Program`;
+}
+
 export default function CertificatePage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-[var(--void)]" />}>
@@ -126,7 +131,7 @@ function CertificateDisplay({ certificate }: { certificate: PublicCertificate })
         </div>
 
         <h1 className="mb-2 font-[family-name:var(--font-display)] text-3xl font-bold sm:text-4xl">
-          {certificate.displayName ?? "Certified Intern"}
+          {certificate.displayName ?? `Certified ${certificate.rankName}`}
         </h1>
 
         {locationParts.length > 0 && (
@@ -137,10 +142,10 @@ function CertificateDisplay({ certificate }: { certificate: PublicCertificate })
 
         <p className="mx-auto mb-8 max-w-md text-sm leading-relaxed sm:text-base">
           has successfully completed the AstraMind Analytics{" "}
-          <strong>Data Analytics Internship Program</strong>, demonstrating
-          proficiency in SQL-based data analysis across real client scenarios,
-          and is hereby recognized as a{" "}
-          <strong>Certified Intern</strong>.
+          <strong>{programLabelForRank(certificate.rankName)}</strong>,
+          demonstrating proficiency in SQL-based data analysis across real
+          client scenarios, and is hereby recognized as a{" "}
+          <strong>Certified {certificate.rankName}</strong>.
         </p>
 
         <div
