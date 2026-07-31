@@ -43,6 +43,12 @@ import { junior041 } from "./junior041";
 import { junior042 } from "./junior042";
 import { junior043 } from "./junior043";
 import { junior044 } from "./junior044";
+import { junior045 } from "./junior045";
+import { junior046 } from "./junior046";
+import { junior047 } from "./junior047";
+import { junior048 } from "./junior048";
+import { junior049 } from "./junior049";
+import { junior050 } from "./junior050";
 
 /**
  * Junior Data Analyst rank missions, in unlock order. Populated module by
@@ -95,11 +101,16 @@ export const juniorMissions: Mission[] = [
   junior042,
   junior043,
   junior044,
+  junior045,
+  junior046,
+  junior047,
+  junior048,
+  junior049,
+  junior050,
 ];
 
 /**
- * Module names not yet built, shown as locked "coming soon" cards.
+ * All 50 Junior Data Analyst tickets are now written. This stays empty
+ * until Data Analyst rank content begins.
  */
-export const juniorUpcomingModules: string[] = [
-  "Junior Analyst Capstone Assessment",
-];
+export const juniorUpcomingModules: string[] = [];
