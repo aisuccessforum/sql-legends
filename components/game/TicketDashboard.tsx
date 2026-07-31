@@ -82,6 +82,8 @@ export default function TicketDashboard({
             <a
               key={cert.certificateNumber}
               href={`/certificate?number=${encodeURIComponent(cert.certificateNumber)}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="console-card flex items-center justify-between gap-4 px-6 py-5 transition-all hover:opacity-90"
               style={{
                 borderColor: "var(--terminal)",
