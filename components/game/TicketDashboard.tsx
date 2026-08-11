@@ -3,6 +3,10 @@
 import type { Mission } from "@/content/missions/level001";
 import { missions } from "@/content/missions";
 import { juniorMissions, juniorUpcomingModules } from "@/content/junior-missions";
+import {
+  dataAnalystMissions,
+  dataAnalystUpcomingModules,
+} from "@/content/data-analyst-missions";
 import { useGameStore } from "@/store/useGameStore";
 
 type TicketStatus = "completed" | "available" | "locked";
@@ -34,6 +38,13 @@ function tracksForRank(rank: string): {
       activeMissions: juniorMissions,
       activeUpcomingModules: juniorUpcomingModules,
       eyebrow: "JUNIOR DATA ANALYST // TICKET QUEUE",
+    };
+  }
+  if (rank === "Data Analyst") {
+    return {
+      activeMissions: dataAnalystMissions,
+      activeUpcomingModules: dataAnalystUpcomingModules,
+      eyebrow: "DATA ANALYST // TICKET QUEUE",
     };
   }
   return {

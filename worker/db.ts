@@ -214,6 +214,11 @@ export async function checkAndIssuePromotion(
     };
   }
 
+  // A milestone with no tickets yet isn't achievable — without this guard,
+  // .every() on an empty array is trivially true, which would instantly
+  // promote anyone who reaches this rank before its content even exists.
+  if (milestone.requiredMissionIds.length === 0) return null;
+
   const hasCompletedAll = milestone.requiredMissionIds.every((id) =>
     completedMissions.includes(id)
   );
