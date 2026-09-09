@@ -40,15 +40,22 @@ export const useGameStore = create<GameState>((set, get) => ({
   certificates: [],
 
   seedFromProfile: (profile) =>
-    set({
+    set((state) => ({
       rank: profile.rank,
       xp: profile.xp,
-      completedMissions: profile.completedMissions,
+      // Merge server completions with local ones. Never drop a locally-recorded
+      // completion: if ProgressSync's getProfile() returns slightly stale data
+      // (D1 hasn't committed the sync write yet), overwriting would clear the
+      // mission the player just finished and hide the Next Ticket button.
+      // Since missions are never un-completed, the union is always correct.
+      completedMissions: Array.from(
+        new Set([...state.completedMissions, ...(profile.completedMissions ?? [])])
+      ),
       certificateNumber: profile.certificateNumber ?? null,
       certifiedAt: profile.certifiedAt ?? null,
       certificates: profile.certificates ?? [],
       ready: true,
-    }),
+    })),
 
   completeMission: (missionId, xpAward) => {
     if (get().completedMissions.includes(missionId)) return;
