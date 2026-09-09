@@ -16,6 +16,7 @@ import { missions } from "@/content/missions";
 import { juniorMissions } from "@/content/junior-missions";
 import { dataAnalystMissions } from "@/content/data-analyst-missions";
 import { seniorAnalystMissions } from "@/content/senior-analyst-missions";
+import { biDeveloperMissions } from "@/content/bi-developer-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
@@ -125,6 +126,7 @@ export default function Home() {
                 juniorMissions,
                 dataAnalystMissions,
                 seniorAnalystMissions,
+                biDeveloperMissions,
               ];
               const track =
                 allTracks.find((t) => t.some((m) => m.id === activeMission.id)) ??
