@@ -22,6 +22,7 @@ import { juniorMissions } from "../content/junior-missions";
 import { dataAnalystMissions } from "../content/data-analyst-missions";
 import { seniorAnalystMissions } from "../content/senior-analyst-missions";
 import { biDeveloperMissions } from "../content/bi-developer-missions";
+import { analyticsEngineerMissions } from "../content/analytics-engineer-missions";
 
 export interface Env {
   DB: D1Database;
@@ -61,6 +62,11 @@ const PROMOTION_MILESTONES: PromotionMilestone[] = [
     rankName: "BI Developer",
     requiredMissionIds: biDeveloperMissions.map((m) => m.id),
     nextRank: "Analytics Engineer",
+  },
+  {
+    rankName: "Analytics Engineer",
+    requiredMissionIds: analyticsEngineerMissions.map((m) => m.id),
+    nextRank: "Data Engineer",
   },
 ];
 

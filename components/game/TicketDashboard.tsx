@@ -15,6 +15,10 @@ import {
   biDeveloperMissions,
   biDeveloperUpcomingModules,
 } from "@/content/bi-developer-missions";
+import {
+  analyticsEngineerMissions,
+  analyticsEngineerUpcomingModules,
+} from "@/content/analytics-engineer-missions";
 import { useGameStore } from "@/store/useGameStore";
 
 type TicketStatus = "completed" | "available" | "locked";
@@ -67,6 +71,13 @@ function tracksForRank(rank: string): {
       activeMissions: biDeveloperMissions,
       activeUpcomingModules: biDeveloperUpcomingModules,
       eyebrow: "BI DEVELOPER // TICKET QUEUE",
+    };
+  }
+  if (rank === "Analytics Engineer") {
+    return {
+      activeMissions: analyticsEngineerMissions,
+      activeUpcomingModules: analyticsEngineerUpcomingModules,
+      eyebrow: "ANALYTICS ENGINEER // TICKET QUEUE",
     };
   }
   return {
