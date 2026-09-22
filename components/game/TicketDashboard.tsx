@@ -19,6 +19,10 @@ import {
   analyticsEngineerMissions,
   analyticsEngineerUpcomingModules,
 } from "@/content/analytics-engineer-missions";
+import {
+  dataEngineerMissions,
+  dataEngineerUpcomingModules,
+} from "@/content/data-engineer-missions";
 import { useGameStore } from "@/store/useGameStore";
 
 type TicketStatus = "completed" | "available" | "locked";
@@ -78,6 +82,13 @@ function tracksForRank(rank: string): {
       activeMissions: analyticsEngineerMissions,
       activeUpcomingModules: analyticsEngineerUpcomingModules,
       eyebrow: "ANALYTICS ENGINEER // TICKET QUEUE",
+    };
+  }
+  if (rank === "Data Engineer") {
+    return {
+      activeMissions: dataEngineerMissions,
+      activeUpcomingModules: dataEngineerUpcomingModules,
+      eyebrow: "DATA ENGINEER // TICKET QUEUE",
     };
   }
   return {
