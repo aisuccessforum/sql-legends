@@ -11,6 +11,10 @@ import OnboardingForm from "@/components/auth/OnboardingForm";
 import ProgressSync from "@/components/game/ProgressSync";
 import TicketDashboard from "@/components/game/TicketDashboard";
 import ComingSoon from "@/components/game/ComingSoon";
+import CareerHub from "@/components/game/CareerHub";
+import StudyHub from "@/components/study/StudyHub";
+import ModuleDetail from "@/components/study/ModuleDetail";
+import { allRankStudy, type StudyModule } from "@/content/study/studyData";
 import type { Mission } from "@/content/missions/level001";
 import { missions } from "@/content/missions";
 import { juniorMissions } from "@/content/junior-missions";
@@ -24,35 +28,33 @@ import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
 type AuthState = "loading" | "signed-out" | "onboarding" | "ready";
-type View = "dashboard" | "mission" | "coming-soon";
+type View = "hub" | "study" | "module" | "dashboard" | "mission" | "coming-soon";
 
 export default function Home() {
   const [authState, setAuthState] = useState<AuthState>("loading");
   const [email, setEmail] = useState("");
   const [booted, setBooted] = useState(false);
-  const [view, setView] = useState<View>("dashboard");
+  const [view, setView] = useState<View>("hub");
   const [activeMission, setActiveMission] = useState<Mission | null>(null);
+  const [studyRank, setStudyRank] = useState<string>("");
+  const [studyModule, setStudyModule] = useState<StudyModule | null>(null);
+  const [missionFilter, setMissionFilter] = useState<{ start: number; end: number } | null>(null);
+
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
   const completedMissions = useGameStore((s) => s.completedMissions);
+  const rank = useGameStore((s) => s.rank);
 
   useEffect(() => {
     let cancelled = false;
     getProfile()
       .then((profile) => {
         if (cancelled) return;
-        if (!profile) {
-          setAuthState("signed-out");
-          return;
-        }
+        if (!profile) { setAuthState("signed-out"); return; }
         setEmail(profile.email);
-        if (!profile.onboardingComplete) {
-          setAuthState("onboarding");
-          return;
-        }
+        if (!profile.onboardingComplete) { setAuthState("onboarding"); return; }
         seedFromProfile({
-          rank: profile.rank,
-          xp: profile.xp,
+          rank: profile.rank, xp: profile.xp,
           completedMissions: profile.completedMissions,
           certificateNumber: profile.certificateNumber,
           certifiedAt: profile.certifiedAt,
@@ -61,15 +63,12 @@ export default function Home() {
         setAuthState("ready");
       })
       .catch(() => setAuthState("signed-out"));
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [seedFromProfile]);
 
   function handleOnboardingComplete(profile: PlayerProfile) {
     seedFromProfile({
-      rank: profile.rank,
-      xp: profile.xp,
+      rank: profile.rank, xp: profile.xp,
       completedMissions: profile.completedMissions,
       certificateNumber: profile.certificateNumber,
       certifiedAt: profile.certifiedAt,
@@ -78,90 +77,97 @@ export default function Home() {
     setAuthState("ready");
   }
 
-  if (authState === "loading") {
-    return <div className="min-h-screen bg-[var(--void)]" />;
-  }
-
-  if (authState === "signed-out") {
-    return <LandingPage />;
-  }
-
-  if (authState === "onboarding") {
-    return <OnboardingForm email={email} onComplete={handleOnboardingComplete} />;
-  }
-
-  if (!ready) {
-    return <div className="min-h-screen bg-[var(--void)]" />;
-  }
-
-  if (!booted) {
-    return <BootSequence onDone={() => setBooted(true)} />;
-  }
+  if (authState === "loading") return <div className="min-h-screen bg-[var(--void)]" />;
+  if (authState === "signed-out") return <LandingPage />;
+  if (authState === "onboarding") return <OnboardingForm email={email} onComplete={handleOnboardingComplete} />;
+  if (!ready) return <div className="min-h-screen bg-[var(--void)]" />;
+  if (!booted) return <BootSequence onDone={() => setBooted(true)} />;
 
   const hudWorld =
-    view === "mission" && activeMission
-      ? activeMission.world
-      : view === "coming-soon"
-        ? "Upcoming Modules"
-        : "Ticket Dashboard";
+    view === "mission" && activeMission ? activeMission.world
+    : view === "coming-soon" ? "Upcoming Modules"
+    : view === "hub" ? "Career Hub"
+    : view === "study" ? `Study — ${studyRank}`
+    : view === "module" && studyModule ? studyModule.title
+    : "Ticket Dashboard";
+
+  const currentRankStudy = allRankStudy.find((r) => r.rank === rank);
 
   return (
     <div className="flex min-h-screen flex-col">
       <StatusBar world={hudWorld} />
 
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:py-12">
-        {view === "dashboard" && (
-          <TicketDashboard
-            onSelectMission={(mission) => {
-              setActiveMission(mission);
-              setView("mission");
-            }}
-            onSelectComingSoon={() => setView("coming-soon")}
+
+        {/* ── Career Hub ── */}
+        {view === "hub" && (
+          <CareerHub
+            onEnterRank={() => { setMissionFilter(null); setView("dashboard"); }}
+            onStudyRank={(r) => { setStudyRank(r); setView("study"); }}
           />
         )}
 
+        {/* ── Study Hub ── */}
+        {view === "study" && (
+          <StudyHub
+            rank={studyRank}
+            onSelectModule={(mod) => { setStudyModule(mod); setView("module"); }}
+            onBack={() => setView("hub")}
+            onEnterTickets={() => { setMissionFilter(null); setView("dashboard"); }}
+          />
+        )}
+
+        {/* ── Module Detail ── */}
+        {view === "module" && studyModule && (
+          <ModuleDetail
+            mod={studyModule}
+            rankName={studyRank}
+            totalModules={currentRankStudy?.modules.length ?? 7}
+            onBack={() => setView("study")}
+            onPractice={(start, end) => {
+              setMissionFilter({ start, end });
+              setView("dashboard");
+            }}
+          />
+        )}
+
+        {/* ── Ticket Dashboard ── */}
+        {view === "dashboard" && (
+          <TicketDashboard
+            missionFilter={missionFilter}
+            onSelectMission={(mission) => { setActiveMission(mission); setView("mission"); }}
+            onSelectComingSoon={() => setView("coming-soon")}
+            onBack={() => setView("hub")}
+          />
+        )}
+
+        {/* ── Mission / SQL Terminal ── */}
         {view === "mission" && activeMission && (
           <div className="w-full max-w-6xl">
             {(() => {
               const isDone = completedMissions.includes(activeMission.id);
               const allTracks = [
-                missions,
-                juniorMissions,
-                dataAnalystMissions,
-                seniorAnalystMissions,
-                biDeveloperMissions,
-                analyticsEngineerMissions,
-                dataEngineerMissions,
-                staffAnalystMissions,
+                missions, juniorMissions, dataAnalystMissions, seniorAnalystMissions,
+                biDeveloperMissions, analyticsEngineerMissions, dataEngineerMissions, staffAnalystMissions,
               ];
-              const track =
-                allTracks.find((t) => t.some((m) => m.id === activeMission.id)) ??
-                missions;
-              const activeIndex = track.findIndex(
-                (m) => m.id === activeMission.id
-              );
-              const nextMission =
-                activeIndex >= 0 && activeIndex < track.length - 1
-                  ? track[activeIndex + 1]
-                  : null;
+              const track = allTracks.find((t) => t.some((m) => m.id === activeMission.id)) ?? missions;
+              const activeIndex = track.findIndex((m) => m.id === activeMission.id);
+              const nextMission = activeIndex >= 0 && activeIndex < track.length - 1 ? track[activeIndex + 1] : null;
+              const isFilteredLast = missionFilter && activeIndex === missionFilter.end;
 
               return (
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                  <button
-                    onClick={() => setView("dashboard")}
-                    className="btn-chunky"
-                  >
+                  <button onClick={() => setView("dashboard")} className="btn-chunky">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     Ticket Queue
                   </button>
 
-                  {isDone && nextMission && (
+                  {isDone && nextMission && !isFilteredLast && (
                     <button
                       onClick={() => setActiveMission(nextMission)}
-                      className="btn-chunky pulse-badge"
-                      style={{ borderColor: "var(--terminal)", color: "var(--terminal)" }}
+                      className="btn-chunky"
                     >
                       Next Ticket
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -169,49 +175,32 @@ export default function Home() {
                       </svg>
                     </button>
                   )}
-
-                  {isDone && !nextMission && (
-                    <button
-                      onClick={() => setView("coming-soon")}
-                      className="btn-chunky"
-                      style={{ borderColor: "var(--dossier)", color: "var(--dossier)" }}
-                    >
-                      More Tickets Coming Soon
-                    </button>
-                  )}
                 </div>
               );
             })()}
 
-            <div
-              key={activeMission.id}
-              className="console-card grid min-h-[560px] grid-cols-1 overflow-hidden md:grid-cols-2"
-            >
-              <div
-                className="border-b md:border-b-0 md:border-r"
-                style={{ borderColor: "var(--console-line)" }}
-              >
-                <Dossier mission={activeMission} />
-              </div>
+            <ProgressSync />
+            <XpToast />
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.6fr]">
+              <Dossier mission={activeMission} />
               <SqlTerminal mission={activeMission} />
             </div>
-
-            <p
-              className="mt-6 text-center font-[family-name:var(--font-mono)] text-[11px] tracking-[0.14em]"
-              style={{ color: "var(--text-lo)" }}
-            >
-              ASTRAMIND ANALYTICS // SECURE CONNECTION ESTABLISHED
-            </p>
           </div>
         )}
 
+        {/* ── Coming Soon ── */}
         {view === "coming-soon" && (
-          <ComingSoon onBack={() => setView("dashboard")} />
+          <div>
+            <button onClick={() => setView("dashboard")} className="btn-chunky mb-5">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Ticket Queue
+            </button>
+            <ComingSoon />
+          </div>
         )}
       </main>
-
-      <XpToast />
-      <ProgressSync />
     </div>
   );
 }

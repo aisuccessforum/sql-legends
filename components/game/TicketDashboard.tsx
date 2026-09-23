@@ -34,6 +34,9 @@ type TicketStatus = "completed" | "available" | "locked";
 interface Props {
   onSelectMission: (mission: Mission) => void;
   onSelectComingSoon: () => void;
+  /** When set, shows only missions at indices [start..end] (0-based within the rank's array) */
+  missionFilter?: { start: number; end: number } | null;
+  onBack?: () => void;
 }
 
 // Maps a player's current rank to that rank's ticket queue and eyebrow
@@ -112,12 +115,20 @@ function tracksForRank(rank: string): {
 export default function TicketDashboard({
   onSelectMission,
   onSelectComingSoon,
+  missionFilter,
+  onBack,
 }: Props) {
   const completedMissions = useGameStore((s) => s.completedMissions);
   const certificates = useGameStore((s) => s.certificates);
   const rank = useGameStore((s) => s.rank);
 
-  const { activeMissions, activeUpcomingModules, eyebrow } = tracksForRank(rank);
+  const { activeMissions: allMissions, activeUpcomingModules, eyebrow } = tracksForRank(rank);
+
+  // Apply module filter if set (slices the rank's mission array by position)
+  const activeMissions =
+    missionFilter != null
+      ? allMissions.slice(missionFilter.start, missionFilter.end + 1)
+      : allMissions;
 
   const firstIncompleteIndex = activeMissions.findIndex(
     (m) => !completedMissions.includes(m.id)
@@ -142,6 +153,46 @@ export default function TicketDashboard({
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
+      {/* Back to Career Hub */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            fontSize: 12, color: "var(--text-muted)",
+            background: "none", border: "none", cursor: "pointer",
+            padding: 0, marginBottom: "1rem",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Career hub
+        </button>
+      )}
+
+      {/* Module filter notice */}
+      {missionFilter != null && (
+        <div
+          style={{
+            fontSize: 12, color: "var(--text-accent)", background: "var(--bg-accent)",
+            border: "0.5px solid var(--border-accent)", borderRadius: 8,
+            padding: "7px 12px", marginBottom: "1rem",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}
+        >
+          <span>Showing module tickets only</span>
+          {onBack && (
+            <button
+              onClick={onBack}
+              style={{ fontSize: 11, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            >
+              See all →
+            </button>
+          )}
+        </div>
+      )}
+
       {certificates.length > 0 && (
         <div className="mb-8 space-y-3">
           {certificates.map((cert) => (
