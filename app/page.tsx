@@ -19,6 +19,7 @@ import { seniorAnalystMissions } from "@/content/senior-analyst-missions";
 import { biDeveloperMissions } from "@/content/bi-developer-missions";
 import { analyticsEngineerMissions } from "@/content/analytics-engineer-missions";
 import { dataEngineerMissions } from "@/content/data-engineer-missions";
+import { staffAnalystMissions } from "@/content/staff-analyst-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 
@@ -131,6 +132,7 @@ export default function Home() {
                 biDeveloperMissions,
                 analyticsEngineerMissions,
                 dataEngineerMissions,
+                staffAnalystMissions,
               ];
               const track =
                 allTracks.find((t) => t.some((m) => m.id === activeMission.id)) ??
