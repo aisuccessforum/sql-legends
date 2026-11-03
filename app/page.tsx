@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import BootSequence from "@/components/boot/BootSequence";
+import "@/app/spatial.css";
 import StatusBar from "@/components/hud/StatusBar";
 import XpToast from "@/components/hud/XpToast";
 import Dossier from "@/components/dossier/Dossier";
@@ -143,7 +144,7 @@ export default function Home() {
 
         {/* ── Mission / SQL Terminal ── */}
         {view === "mission" && activeMission && (
-          <div className="w-full max-w-6xl">
+          <div className="zoom-out w-full max-w-6xl">
             {(() => {
               const isDone = completedMissions.includes(activeMission.id);
               const allTracks = [
@@ -182,8 +183,8 @@ export default function Home() {
             <ProgressSync />
             <XpToast />
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.6fr]">
-              <Dossier mission={activeMission} />
-              <SqlTerminal mission={activeMission} />
+              <div className="slide-l"><Dossier mission={activeMission} /></div>
+              <div className="slide-r"><SqlTerminal mission={activeMission} /></div>
             </div>
           </div>
         )}

@@ -4,7 +4,7 @@ import { useTypewriter } from "@/lib/useTypewriter";
 import { useEffect } from "react";
 
 const BOOT_LINES = [
-  "GLOBAL DATA ACADEMY // SECURE TERMINAL",
+  "Data Training Academy // SECURE TERMINAL",
   "AUTHENTICATING BOARDING PASS...",
   "IDENTITY CONFIRMED.",
   "CLEARANCE LEVEL: INTERN",
