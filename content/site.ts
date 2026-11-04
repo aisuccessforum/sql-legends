@@ -3,8 +3,8 @@ export const SITE = {
   product: "SQL Legends",
   brand: "AstraMind Analytics",
   domain: "sql.aisuccessforum.online",
-  seller: "TryoData Technologies",          // TODO: confirm legal seller name
-  sellerAddress: "Thane, Maharashtra, India", // TODO: full registered address
+  seller: "AI Success Forum",          // TODO: confirm legal seller name
+  sellerAddress: "C2-101 Sanghvi Valley, Parsik Nagar, Thane, Maharashtra, India", // TODO: full registered address
   phone: "+91 99201 45556",                  // TODO: real phone (Cashfree KYC needs a valid number)
   supportEmail: "support@aisuccessforum.online", // TODO: confirm
   priceInr: 999,                             // bundle for all paid ranks, no GST
