@@ -169,9 +169,9 @@ const worker = {
 
     // --- Logout ---
     if (path === "/api/auth/logout" && request.method === "POST") {
-      const headers = new Headers();
+      const headers = new Headers({ "Content-Type": "application/json" });
       headers.append("Set-Cookie", clearCookie(SESSION_COOKIE_NAME));
-      return json({ ok: true }, { headers });
+      return new Response(JSON.stringify({ ok: true }), { headers });
     }
 
     // --- Current player profile ---
