@@ -2,7 +2,7 @@
 import "@/app/spatial.css";
 import { useState } from "react";
 import { SITE, PAID_RANK_COUNT } from "@/content/site";
-import { redeemCode, startPayment } from "@/lib/access";
+import { quotePrice, redeemCode, startPayment } from "@/lib/access";
 
 export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => void; onUnlocked: () => void }) {
   const [code, setCode] = useState("");
@@ -10,10 +10,21 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
   const [payMsg, setPayMsg] = useState("");
   const [phone, setPhone] = useState("");
   const [codeMsg, setCodeMsg] = useState("");
+  const [disc, setDisc] = useState("");
+  const [applied, setApplied] = useState<{ code: string; amount: number; pct: number } | null>(null);
+  const [discMsg, setDiscMsg] = useState("");
+
+  async function applyDiscount() {
+    setDiscMsg("");
+    if (!disc.trim()) { setApplied(null); return; }
+    const r = await quotePrice(disc.trim());
+    if (r.ok && r.pct && r.amount) { setApplied({ code: disc.trim(), amount: r.amount, pct: r.pct }); setDiscMsg(`${r.pct}% discount applied.`); }
+    else { setApplied(null); setDiscMsg(r.error ?? "Could not apply this code."); }
+  }
 
   async function pay() {
     setBusy("pay"); setPayMsg("");
-    const r = await startPayment(phone.trim());
+    const r = await startPayment(phone.trim(), applied?.code ?? "");
     if (!r.ok) setPayMsg(r.message ?? "Payment gateway is currently not available. Please try again after some time.");
     setBusy("");
   }
@@ -38,10 +49,19 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
       <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
         <section className="glass" style={card}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--text-hi)", marginBottom: 6 }}>Enroll</h2>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 46, fontWeight: 700, color: "var(--neon-cyan)", lineHeight: 1 }}>₹{SITE.priceInr.toLocaleString("en-IN")}</p>
+          <p style={{ fontFamily: "var(--font-display)", fontSize: 46, fontWeight: 700, color: "var(--neon-cyan)", lineHeight: 1 }}>
+            {applied && <span style={{ fontSize: 22, color: "var(--text-lo)", textDecoration: "line-through", marginRight: 12 }}>₹{SITE.priceInr.toLocaleString("en-IN")}</span>}
+            ₹{(applied?.amount ?? SITE.priceInr).toLocaleString("en-IN")}
+          </p>
           <p style={{ color: "var(--text-lo)", fontSize: 14, margin: "8px 0 18px" }}>One-time · all {PAID_RANK_COUNT} paid ranks · lifetime access · no GST</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+            <input value={disc} onChange={(e) => { setDisc(e.target.value); setApplied(null); setDiscMsg(""); }} placeholder="Discount code (optional)" autoCapitalize="characters" spellCheck={false} aria-label="Discount code"
+              style={{ flex: 1, minWidth: 0, padding: "13px 16px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "rgba(0,0,0,0.45)", color: "var(--text-hi)", fontFamily: "var(--font-mono)", fontSize: 15 }} />
+            <button type="button" onClick={applyDiscount} disabled={!disc.trim()} style={{ padding: "0 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "none", color: "var(--text-hi)", cursor: "pointer", opacity: disc.trim() ? 1 : 0.5 }}>Apply</button>
+          </div>
+          {discMsg && <p style={{ fontSize: 13, marginBottom: 10, color: applied ? "var(--terminal)" : "#ffb4b8" }}>{discMsg}</p>}
           <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9+ -]/g, ""))} inputMode="tel" placeholder="Mobile number (10 digits)" aria-label="Mobile number"
-            style={{ width: "100%", padding: "15px 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "rgba(0,0,0,0.45)", color: "var(--text-hi)", fontSize: 16, marginBottom: 14 }} />
+            style={{ width: "100%", padding: "15px 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "rgba(0,0,0,0.45)", color: "var(--text-hi)", fontSize: 16, marginBottom: 14, marginTop: 8 }} />
           <button className="pill-3d" style={{ width: "100%", justifyContent: "center", fontSize: 17, padding: "15px 24px" }} onClick={pay} disabled={busy === "pay"}>
             {busy === "pay" ? "Please wait…" : "Proceed to payment"}
           </button>

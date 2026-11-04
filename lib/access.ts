@@ -34,9 +34,9 @@ function loadCashfreeSdk(): Promise<void> {
 }
 
 /** Creates an order on our server, then opens Cashfree's hosted checkout. */
-export async function startPayment(phone: string): Promise<{ ok: boolean; message?: string }> {
+export async function startPayment(phone: string, code = ""): Promise<{ ok: boolean; message?: string }> {
   try {
-    const r = await fetch("/api/pay/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phone }) });
+    const r = await fetch("/api/pay/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phone, code }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok || !d.sessionId) return { ok: false, message: d.message ?? UNAVAILABLE };
     await loadCashfreeSdk();
@@ -56,5 +56,16 @@ export async function verifyPayment(orderId: string): Promise<{ status: string; 
     return await r.json();
   } catch {
     return { status: "UNKNOWN", hasAccess: false };
+  }
+}
+
+/** Preview the price with an optional discount code. */
+export async function quotePrice(code: string): Promise<{ ok: boolean; amount?: number; pct?: number; error?: string }> {
+  try {
+    const r = await fetch("/api/pay/quote", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ code }) });
+    const d = await r.json().catch(() => ({}));
+    return r.ok ? { ok: true, amount: d.amount, pct: d.pct } : { ok: false, error: d.error ?? "Could not apply this code." };
+  } catch {
+    return { ok: false, error: "Network error. Please try again." };
   }
 }

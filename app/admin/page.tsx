@@ -2,7 +2,7 @@
 import "@/app/spatial.css";
 import { useCallback, useEffect, useState } from "react";
 
-interface Code { code: string; owner: string; max_uses: number; uses: number; expires_at: string | null; active: number; created_at: string }
+interface Code { code: string; owner: string; max_uses: number; uses: number; expires_at: string | null; active: number; created_at: string; discount_pct: number }
 interface Enr { email: string; source: string; code: string | null; created_at: string }
 
 export default function AdminPage() {
@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [enr, setEnr] = useState<Enr[]>([]);
   const [owner, setOwner] = useState(""); const [maxUses, setMaxUses] = useState(1);
   const [expiryDays, setExpiryDays] = useState(0); const [count, setCount] = useState(1);
+  const [discountPct, setDiscountPct] = useState(100);
   const [made, setMade] = useState<string[]>([]); const [err, setErr] = useState("");
 
   const load = useCallback(async () => {
@@ -25,7 +26,7 @@ export default function AdminPage() {
 
   async function create(e: React.FormEvent) {
     e.preventDefault(); setErr(""); setMade([]);
-    const r = await fetch("/api/admin/codes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ owner, maxUses, expiryDays: expiryDays || null, count }) });
+    const r = await fetch("/api/admin/codes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ owner, maxUses, expiryDays: expiryDays || null, count, discountPct }) });
     const d = await r.json();
     if (!r.ok) { setErr(d.error ?? "Failed"); return; }
     setMade(d.codes); load();
@@ -47,6 +48,7 @@ export default function AdminPage() {
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: 38, color: "var(--text-hi)", marginBottom: 24 }}>Access codes</h1>
       <form onSubmit={create} className="glass" style={{ borderRadius: 24, padding: 24, display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", alignItems: "end", marginBottom: 20 }}>
         <label style={{ color: "var(--text-lo)", fontSize: 13 }}>Owner (you / partner)<input style={inp} value={owner} onChange={(e) => setOwner(e.target.value)} required placeholder="e.g. Partner – Rahul" /></label>
+        <label style={{ color: "var(--text-lo)", fontSize: 13 }}>Discount % (100 = free access)<input style={inp} type="number" min={1} max={100} value={discountPct} onChange={(e) => setDiscountPct(+e.target.value)} /></label>
         <label style={{ color: "var(--text-lo)", fontSize: 13 }}>Uses per code<input style={inp} type="number" min={1} value={maxUses} onChange={(e) => setMaxUses(+e.target.value)} /></label>
         <label style={{ color: "var(--text-lo)", fontSize: 13 }}>Expires in days (0 = never)<input style={inp} type="number" min={0} value={expiryDays} onChange={(e) => setExpiryDays(+e.target.value)} /></label>
         <label style={{ color: "var(--text-lo)", fontSize: 13 }}>How many codes<input style={inp} type="number" min={1} max={100} value={count} onChange={(e) => setCount(+e.target.value)} /></label>
@@ -58,9 +60,9 @@ export default function AdminPage() {
       )}
       <div className="glass" style={{ borderRadius: 24, padding: 8, overflowX: "auto", marginBottom: 28 }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><th style={th}>Code</th><th style={th}>Owner</th><th style={th}>Used</th><th style={th}>Expires</th><th style={th}>Status</th><th style={th}></th></tr></thead>
+          <thead><tr><th style={th}>Code</th><th style={th}>Owner</th><th style={th}>Type</th><th style={th}>Used</th><th style={th}>Expires</th><th style={th}>Status</th><th style={th}></th></tr></thead>
           <tbody>{codes.map((c) => (
-            <tr key={c.code}><td style={{ ...td, fontFamily: "var(--font-mono)" }}>{c.code}</td><td style={td}>{c.owner}</td><td style={td}>{c.uses}/{c.max_uses}</td>
+            <tr key={c.code}><td style={{ ...td, fontFamily: "var(--font-mono)" }}>{c.code}</td><td style={td}>{c.owner}</td><td style={td}>{c.discount_pct >= 100 ? "Free access" : `${c.discount_pct}% off`}</td><td style={td}>{c.uses}/{c.max_uses}</td>
               <td style={td}>{c.expires_at ?? "never"}</td><td style={td}>{c.active ? "active" : "disabled"}</td>
               <td style={td}><button onClick={() => toggle(c)} style={{ background: "none", border: "1px solid var(--glass-line)", color: "var(--text-hi)", borderRadius: 10, padding: "5px 12px", cursor: "pointer" }}>{c.active ? "Disable" : "Enable"}</button></td></tr>
           ))}</tbody>

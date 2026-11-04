@@ -42,20 +42,36 @@ async function hmacBase64(secret: string, message: string): Promise<string> {
   return btoa(s);
 }
 
+
+/** Price after a discount code. Returns an error string if the code can't be used. */
+async function priceWithCode(db: any, rawCode: string): Promise<{ ok: true; code: string; pct: number; amount: number } | { ok: false; error: string }> {
+  const code = rawCode.trim().toUpperCase();
+  const row = await db.prepare(
+    "SELECT code, discount_pct FROM access_codes WHERE code = ? AND active = 1 AND uses < max_uses AND (expires_at IS NULL OR expires_at > datetime('now'))"
+  ).bind(code).first();
+  if (!row) return { ok: false, error: "This code is invalid, expired, or fully used." };
+  const pct = Number(row.discount_pct);
+  if (pct >= 100) return { ok: false, error: "This is a free-access code. Use the access code box instead." };
+  const amount = Math.max(1, Math.round((SITE.priceInr * (100 - pct)) / 100));
+  return { ok: true, code, pct, amount };
+}
+
 /** Ask Cashfree for the real order status (never trust the browser or the webhook body alone) and unlock on PAID. */
 async function settleOrder(env: AccessEnv, orderId: string): Promise<{ found: boolean; status: string; userId?: string }> {
   const db = env.DB;
-  const row = await db.prepare("SELECT order_id, user_id, email, amount_inr, status FROM payments WHERE order_id = ?").bind(orderId).first();
+  const row = await db.prepare("SELECT order_id, user_id, email, amount_inr, status, discount_code FROM payments WHERE order_id = ?").bind(orderId).first();
   if (!row) return { found: false, status: "UNKNOWN" };
   if (row.status === "PAID") return { found: true, status: "PAID", userId: row.user_id };
   const r = await fetch(`${cfBase(env)}/orders/${encodeURIComponent(orderId)}`, { headers: cfHeaders(env) });
   if (!r.ok) return { found: true, status: "PENDING", userId: row.user_id };
   const d = (await r.json()) as { order_status?: string; order_amount?: number; cf_order_id?: string | number };
   if (d.order_status === "PAID" && Number(d.order_amount) === Number(row.amount_inr)) {
-    await db.batch([
-      db.prepare("UPDATE payments SET status = 'PAID', paid_at = datetime('now'), cf_order_id = ? WHERE order_id = ?").bind(String(d.cf_order_id ?? ""), orderId),
-      db.prepare("INSERT OR IGNORE INTO enrollments (user_id, email, source, payment_id, amount_inr) VALUES (?, ?, 'payment', ?, ?)").bind(row.user_id, row.email, String(d.cf_order_id ?? orderId), row.amount_inr),
-    ]);
+    // Claim the order first so a webhook + browser return racing each other only count once.
+    const claim = await db.prepare("UPDATE payments SET status = 'PAID', paid_at = datetime('now'), cf_order_id = ? WHERE order_id = ? AND status != 'PAID'").bind(String(d.cf_order_id ?? ""), orderId).run();
+    if (claim.meta?.changes) {
+      await db.prepare("INSERT OR IGNORE INTO enrollments (user_id, email, source, code, payment_id, amount_inr) VALUES (?, ?, 'payment', ?, ?, ?)").bind(row.user_id, row.email, row.discount_code ?? null, String(d.cf_order_id ?? orderId), row.amount_inr).run();
+      if (row.discount_code) await db.prepare("UPDATE access_codes SET uses = uses + 1 WHERE code = ?").bind(row.discount_code).run();
+    }
     return { found: true, status: "PAID", userId: row.user_id };
   }
   return { found: true, status: d.order_status ?? "PENDING", userId: row.user_id };
@@ -98,6 +114,8 @@ export async function handleAccess(request: Request, env: AccessEnv, user: Acces
     if (!code) return json({ error: "Enter an access code." }, 400);
     const existing = await db.prepare("SELECT 1 AS x FROM enrollments WHERE user_id = ?").bind(user.id).first();
     if (existing) return json({ ok: true, already: true });
+    const kind = await db.prepare("SELECT discount_pct FROM access_codes WHERE code = ?").bind(code).first();
+    if (kind && Number(kind.discount_pct) < 100) return json({ error: "This is a discount code. Enter it in the payment box above the Pay button." }, 400);
     const upd = await db.prepare(
       "UPDATE access_codes SET uses = uses + 1 WHERE code = ? AND active = 1 AND uses < max_uses AND (expires_at IS NULL OR expires_at > datetime('now'))"
     ).bind(code).run();
@@ -111,17 +129,32 @@ export async function handleAccess(request: Request, env: AccessEnv, user: Acces
     return json({ ok: true });
   }
 
+  // ── payment: preview price with a discount code ──
+  if (p === "/api/pay/quote" && request.method === "POST") {
+    const b = (await request.json().catch(() => ({}))) as { code?: string };
+    if (!(b.code ?? "").trim()) return json({ ok: true, pct: 0, amount: SITE.priceInr });
+    const q = await priceWithCode(db, b.code!);
+    if (!q.ok) return json({ error: q.error }, 400);
+    return json({ ok: true, pct: q.pct, amount: q.amount });
+  }
+
   // ── payment: create a Cashfree order ──
   if (p === "/api/pay/create" && request.method === "POST") {
     if (!gatewayConfigured(env)) return json({ error: "payment_unavailable", message: PAY_UNAVAILABLE }, 503);
     const existing = await db.prepare("SELECT 1 AS x FROM enrollments WHERE user_id = ?").bind(user.id).first();
     if (existing) return json({ error: "already_enrolled", message: "You already have full access." }, 409);
-    const body = (await request.json().catch(() => ({}))) as { phone?: string };
+    const body = (await request.json().catch(() => ({}))) as { phone?: string; code?: string };
     const phone = (body.phone ?? "").replace(/\s|-/g, "");
     if (!/^[6-9]\d{9}$/.test(phone)) return json({ error: "bad_phone", message: "Enter a valid 10-digit mobile number." }, 400);
 
     const orderId = `SL${Date.now()}${Array.from(crypto.getRandomValues(new Uint8Array(4)), (x) => x.toString(16).padStart(2, "0")).join("")}`;
-    const amount = SITE.priceInr;
+    let amount = SITE.priceInr;
+    let discountCode: string | null = null;
+    if ((body.code ?? "").trim()) {
+      const q = await priceWithCode(db, body.code!);
+      if (!q.ok) return json({ error: "bad_code", message: q.error }, 400);
+      amount = q.amount; discountCode = q.code;
+    }
     try {
       const r = await fetch(`${cfBase(env)}/orders`, {
         method: "POST",
@@ -132,7 +165,7 @@ export async function handleAccess(request: Request, env: AccessEnv, user: Acces
           order_currency: "INR",
           customer_details: { customer_id: `u${user.id}`.replace(/[^a-zA-Z0-9]/g, "").slice(0, 50), customer_email: user.email, customer_phone: phone },
           order_meta: { return_url: `${url.origin}/?pay_order=${orderId}`, notify_url: `${url.origin}/api/pay/webhook` },
-          order_note: `${SITE.product} full access`,
+          order_note: `${SITE.product} full access${discountCode ? " (discount)" : ""}`,
         }),
       });
       const d = (await r.json().catch(() => ({}))) as { payment_session_id?: string; message?: string };
@@ -140,7 +173,7 @@ export async function handleAccess(request: Request, env: AccessEnv, user: Acces
         console.error("cashfree create order failed", r.status, JSON.stringify(d));
         return json({ error: "payment_unavailable", message: PAY_UNAVAILABLE }, 503);
       }
-      await db.prepare("INSERT INTO payments (order_id, user_id, email, amount_inr) VALUES (?, ?, ?, ?)").bind(orderId, user.id, user.email, amount).run();
+      await db.prepare("INSERT INTO payments (order_id, user_id, email, amount_inr, discount_code) VALUES (?, ?, ?, ?, ?)").bind(orderId, user.id, user.email, amount, discountCode).run();
       return json({ ok: true, orderId, sessionId: d.payment_session_id, mode: env.CASHFREE_ENV === "production" ? "production" : "sandbox" });
     } catch (e) {
       console.error("cashfree create order error", e);
@@ -164,20 +197,21 @@ export async function handleAccess(request: Request, env: AccessEnv, user: Acces
     if (!isAdmin(env, user)) return json({ error: "forbidden" }, 403);
 
     if (p === "/api/admin/codes" && request.method === "GET") {
-      const { results } = await db.prepare("SELECT code, owner, max_uses, uses, expires_at, active, created_at FROM access_codes ORDER BY created_at DESC LIMIT 500").all();
+      const { results } = await db.prepare("SELECT code, owner, max_uses, uses, expires_at, active, created_at, discount_pct FROM access_codes ORDER BY created_at DESC LIMIT 500").all();
       return json({ codes: results });
     }
     if (p === "/api/admin/codes" && request.method === "POST") {
-      const b = (await request.json().catch(() => ({}))) as { owner?: string; maxUses?: number; expiryDays?: number | null; count?: number; code?: string };
+      const b = (await request.json().catch(() => ({}))) as { owner?: string; maxUses?: number; expiryDays?: number | null; count?: number; code?: string; discountPct?: number };
       const owner = (b.owner ?? "").trim();
       if (!owner) return json({ error: "Owner is required." }, 400);
       const maxUses = Math.min(Math.max(Math.floor(b.maxUses ?? 1), 1), 100000);
       const count = Math.min(Math.max(Math.floor(b.count ?? 1), 1), 100);
+      const pct = Math.min(Math.max(Math.floor(b.discountPct ?? 100), 1), 100);
       const expires = b.expiryDays && b.expiryDays > 0 ? `datetime('now', '+${Math.floor(b.expiryDays)} days')` : "NULL";
       const made: string[] = [];
       for (let i = 0; i < count; i++) {
         const code = (count === 1 && b.code ? b.code.trim().toUpperCase() : genCode());
-        await db.prepare(`INSERT INTO access_codes (code, owner, max_uses, expires_at) VALUES (?, ?, ?, ${expires})`).bind(code, owner, maxUses).run();
+        await db.prepare(`INSERT INTO access_codes (code, owner, max_uses, expires_at, discount_pct) VALUES (?, ?, ?, ${expires}, ?)`).bind(code, owner, maxUses, pct).run();
         made.push(code);
       }
       return json({ ok: true, codes: made });
