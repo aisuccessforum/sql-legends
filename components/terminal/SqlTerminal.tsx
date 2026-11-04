@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Mission } from "@/content/missions/level001";
 import { resultsMatch, runMissionQuery, type QueryResult } from "@/lib/sqlEngine";
 import { useGameStore } from "@/store/useGameStore";
@@ -19,6 +19,14 @@ export default function SqlTerminal({ mission }: { mission: Mission }) {
   );
 
   const lineCount = Math.max(query.split("\n").length, 1);
+  // Start every ticket with a clean editor, results and hints.
+  useEffect(() => {
+    setQuery("");
+    setStatus("idle");
+    setResult(undefined);
+    setErrorMsg("");
+    setHintsShown(0);
+  }, [mission.id]);
 
   async function handleRun() {
     if (!query.trim()) return;
