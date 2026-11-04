@@ -20,13 +20,41 @@ export async function redeemCode(code: string): Promise<{ ok: boolean; error?: s
   }
 }
 
-export async function startPayment(): Promise<{ ok: boolean; message?: string }> {
+const UNAVAILABLE = "Payment gateway is currently not available. Please try again after some time.";
+
+function loadCashfreeSdk(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).Cashfree) { resolve(); return; }
+    const el = document.createElement("script");
+    el.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    el.onload = () => resolve();
+    el.onerror = () => reject(new Error("sdk"));
+    document.head.appendChild(el);
+  });
+}
+
+/** Creates an order on our server, then opens Cashfree's hosted checkout. */
+export async function startPayment(phone: string): Promise<{ ok: boolean; message?: string }> {
   try {
-    const r = await fetch("/api/pay/create", { method: "POST" });
+    const r = await fetch("/api/pay/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ phone }) });
     const d = await r.json().catch(() => ({}));
-    if (r.ok && d.url) { window.location.href = d.url; return { ok: true }; }
-    return { ok: false, message: d.message ?? "Payment gateway is currently not available. Please try again after some time." };
+    if (!r.ok || !d.sessionId) return { ok: false, message: d.message ?? UNAVAILABLE };
+    await loadCashfreeSdk();
+    const cashfree = (window as any).Cashfree({ mode: d.mode === "production" ? "production" : "sandbox" });
+    await cashfree.checkout({ paymentSessionId: d.sessionId, redirectTarget: "_self" });
+    return { ok: true };
   } catch {
-    return { ok: false, message: "Payment gateway is currently not available. Please try again after some time." };
+    return { ok: false, message: UNAVAILABLE };
+  }
+}
+
+/** Called after Cashfree sends the user back to the site. */
+export async function verifyPayment(orderId: string): Promise<{ status: string; hasAccess: boolean }> {
+  try {
+    const r = await fetch(`/api/pay/verify?order_id=${encodeURIComponent(orderId)}`, { cache: "no-store" });
+    if (!r.ok) return { status: "UNKNOWN", hasAccess: false };
+    return await r.json();
+  } catch {
+    return { status: "UNKNOWN", hasAccess: false };
   }
 }

@@ -27,7 +27,7 @@ import { staffAnalystMissions } from "@/content/staff-analyst-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 import UnlockScreen from "@/components/access/UnlockScreen";
-import { getAccess } from "@/lib/access";
+import { getAccess, verifyPayment } from "@/lib/access";
 
 type AuthState = "loading" | "signed-out" | "onboarding" | "ready";
 type View = "unlock" | "hub" | "study" | "module" | "dashboard" | "mission" | "coming-soon";
@@ -44,6 +44,7 @@ export default function Home() {
 
   const [hasAccess, setHasAccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [payNotice, setPayNotice] = useState("");
 
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
@@ -74,6 +75,21 @@ export default function Home() {
   useEffect(() => {
     if (authState !== "ready") return;
     getAccess().then((a) => { setHasAccess(a.hasAccess); setIsAdmin(a.isAdmin); });
+  }, [authState]);
+
+  useEffect(() => {
+    if (authState !== "ready") return;
+    const id = new URLSearchParams(window.location.search).get("pay_order");
+    if (!id) return;
+    verifyPayment(id).then((r) => {
+      if (r.hasAccess) setHasAccess(true);
+      setPayNotice(
+        r.status === "PAID"
+          ? "Payment received. All ranks are now unlocked."
+          : "We could not confirm your payment yet. If money was deducted, access unlocks automatically within a few minutes; otherwise contact support."
+      );
+      window.history.replaceState({}, "", window.location.pathname);
+    });
   }, [authState]);
 
   function handleOnboardingComplete(profile: PlayerProfile) {
@@ -110,6 +126,12 @@ export default function Home() {
 
       {isAdmin && (
         <a href="/admin" style={{ position: "fixed", right: 14, bottom: 14, zIndex: 50, fontFamily: "var(--font-mono)", fontSize: 12, padding: "8px 14px", borderRadius: 999, background: "rgba(124,140,248,.2)", border: "1px solid rgba(124,140,248,.5)", color: "#fff", textDecoration: "none" }}>Admin</a>
+      )}
+      {payNotice && (
+        <div role="status" style={{ margin: "12px auto 0", maxWidth: 760, padding: "14px 18px", borderRadius: 16, background: "rgba(67,242,160,0.12)", border: "1px solid rgba(67,242,160,0.4)", color: "var(--text-hi)", fontSize: 15, display: "flex", gap: 12, justifyContent: "space-between" }}>
+          <span>{payNotice}</span>
+          <button onClick={() => setPayNotice("")} style={{ background: "none", border: "none", color: "var(--text-lo)", cursor: "pointer" }}>✕</button>
+        </div>
       )}
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:py-12">
 

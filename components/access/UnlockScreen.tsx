@@ -8,11 +8,12 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<"" | "pay" | "code">("");
   const [payMsg, setPayMsg] = useState("");
+  const [phone, setPhone] = useState("");
   const [codeMsg, setCodeMsg] = useState("");
 
   async function pay() {
     setBusy("pay"); setPayMsg("");
-    const r = await startPayment();
+    const r = await startPayment(phone.trim());
     if (!r.ok) setPayMsg(r.message ?? "Payment gateway is currently not available. Please try again after some time.");
     setBusy("");
   }
@@ -38,7 +39,9 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
         <section className="glass" style={card}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, color: "var(--text-hi)", marginBottom: 6 }}>Enroll</h2>
           <p style={{ fontFamily: "var(--font-display)", fontSize: 46, fontWeight: 700, color: "var(--neon-cyan)", lineHeight: 1 }}>₹{SITE.priceInr.toLocaleString("en-IN")}</p>
-          <p style={{ color: "var(--text-lo)", fontSize: 14, margin: "8px 0 22px" }}>One-time · all {PAID_RANK_COUNT} paid ranks · lifetime access · no GST</p>
+          <p style={{ color: "var(--text-lo)", fontSize: 14, margin: "8px 0 18px" }}>One-time · all {PAID_RANK_COUNT} paid ranks · lifetime access · no GST</p>
+          <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9+ -]/g, ""))} inputMode="tel" placeholder="Mobile number (10 digits)" aria-label="Mobile number"
+            style={{ width: "100%", padding: "15px 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "rgba(0,0,0,0.45)", color: "var(--text-hi)", fontSize: 16, marginBottom: 14 }} />
           <button className="pill-3d" style={{ width: "100%", justifyContent: "center", fontSize: 17, padding: "15px 24px" }} onClick={pay} disabled={busy === "pay"}>
             {busy === "pay" ? "Please wait…" : "Proceed to payment"}
           </button>
