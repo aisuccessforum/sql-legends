@@ -11,6 +11,7 @@
     }
   ],
   "vars": {
-    "GOOGLE_CLIENT_ID": "138937795182-38atebq5h8ah25ui45s1uku5o81g0lml.apps.googleusercontent.com"
+    "GOOGLE_CLIENT_ID": "138937795182-38atebq5h8ah25ui45s1uku5o81g0lml.apps.googleusercontent.com",
+    "ADMIN_EMAILS": "aisuccessforum@gmail.com"
   }
 }

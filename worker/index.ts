@@ -17,6 +17,7 @@ import {
   SESSION_MAX_AGE,
   verifySessionToken,
 } from "./session";
+import { handleAccess } from "./access";
 import { missions } from "../content/missions";
 import { juniorMissions } from "../content/junior-missions";
 import { dataAnalystMissions } from "../content/data-analyst-missions";
@@ -31,6 +32,7 @@ export interface Env {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   SESSION_SECRET: string;
+  ADMIN_EMAILS?: string;
 }
 
 const STATE_COOKIE_NAME = "sl_oauth_state";
@@ -273,6 +275,22 @@ const worker = {
       }
       return json(cert);
     }
+
+        // --- Access, codes, payment stub, admin ---
+      if (
+        path.startsWith("/api/access") ||
+        path.startsWith("/api/pay") ||
+        path.startsWith("/api/admin")
+      ) {
+        const playerId = await requirePlayerId(request, env);
+        let user: { id: string; email: string } | null = null;
+        if (playerId) {
+          const row = await getPlayer(env.DB, playerId);
+          if (row) user = { id: playerId, email: rowToProfile(row, []).email };
+        }
+        const res = await handleAccess(request, env, user);
+        if (res) return res;
+      }
 
     return json({ error: "Not found" }, { status: 404 });
   },

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import BootSequence from "@/components/boot/BootSequence";
-import "@/app/spatial.css";
 import StatusBar from "@/components/hud/StatusBar";
 import XpToast from "@/components/hud/XpToast";
 import Dossier from "@/components/dossier/Dossier";
@@ -27,9 +26,11 @@ import { dataEngineerMissions } from "@/content/data-engineer-missions";
 import { staffAnalystMissions } from "@/content/staff-analyst-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
+import UnlockScreen from "@/components/access/UnlockScreen";
+import { getAccess } from "@/lib/access";
 
 type AuthState = "loading" | "signed-out" | "onboarding" | "ready";
-type View = "hub" | "study" | "module" | "dashboard" | "mission" | "coming-soon";
+type View = "unlock" | "hub" | "study" | "module" | "dashboard" | "mission" | "coming-soon";
 
 export default function Home() {
   const [authState, setAuthState] = useState<AuthState>("loading");
@@ -40,6 +41,9 @@ export default function Home() {
   const [studyRank, setStudyRank] = useState<string>("");
   const [studyModule, setStudyModule] = useState<StudyModule | null>(null);
   const [missionFilter, setMissionFilter] = useState<{ start: number; end: number } | null>(null);
+
+  const [hasAccess, setHasAccess] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
@@ -67,6 +71,11 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [seedFromProfile]);
 
+  useEffect(() => {
+    if (authState !== "ready") return;
+    getAccess().then((a) => { setHasAccess(a.hasAccess); setIsAdmin(a.isAdmin); });
+  }, [authState]);
+
   function handleOnboardingComplete(profile: PlayerProfile) {
     seedFromProfile({
       rank: profile.rank, xp: profile.xp,
@@ -85,7 +94,8 @@ export default function Home() {
   if (!booted) return <BootSequence onDone={() => setBooted(true)} />;
 
   const hudWorld =
-    view === "mission" && activeMission ? activeMission.world
+    view === "unlock" ? "Unlock access"
+    : view === "mission" && activeMission ? activeMission.world
     : view === "coming-soon" ? "Upcoming Modules"
     : view === "hub" ? "Career Hub"
     : view === "study" ? `Study — ${studyRank}`
@@ -98,13 +108,21 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <StatusBar world={hudWorld} />
 
+      {isAdmin && (
+        <a href="/admin" style={{ position: "fixed", right: 14, bottom: 14, zIndex: 50, fontFamily: "var(--font-mono)", fontSize: 12, padding: "8px 14px", borderRadius: 999, background: "rgba(124,140,248,.2)", border: "1px solid rgba(124,140,248,.5)", color: "#fff", textDecoration: "none" }}>Admin</a>
+      )}
       <main className="flex flex-1 items-center justify-center px-4 py-8 sm:py-12">
+
+        {/* ── Unlock / paywall ── */}
+        {view === "unlock" && (
+          <UnlockScreen onBack={() => setView("hub")} onUnlocked={() => { setHasAccess(true); setView("hub"); }} />
+        )}
 
         {/* ── Career Hub ── */}
         {view === "hub" && (
           <CareerHub
-            onEnterRank={() => { setMissionFilter(null); setView("dashboard"); }}
-            onStudyRank={(r) => { setStudyRank(r); setView("study"); }}
+            onEnterRank={() => { if (rank !== "Intern" && !hasAccess) { setView("unlock"); return; } setMissionFilter(null); setView("dashboard"); }}
+            onStudyRank={(r) => { if (r !== "Intern" && !hasAccess) { setView("unlock"); return; } setStudyRank(r); setView("study"); }}
           />
         )}
 
@@ -136,7 +154,7 @@ export default function Home() {
         {view === "dashboard" && (
           <TicketDashboard
             missionFilter={missionFilter}
-            onSelectMission={(mission) => { setActiveMission(mission); setView("mission"); }}
+            onSelectMission={(mission) => { if (!mission.id.startsWith("intern-") && !hasAccess) { setView("unlock"); return; } setActiveMission(mission); setView("mission"); }}
             onSelectComingSoon={() => setView("coming-soon")}
             onBack={() => setView("hub")}
           />
@@ -144,7 +162,7 @@ export default function Home() {
 
         {/* ── Mission / SQL Terminal ── */}
         {view === "mission" && activeMission && (
-          <div className="zoom-out w-full max-w-6xl">
+          <div className="w-full max-w-6xl">
             {(() => {
               const isDone = completedMissions.includes(activeMission.id);
               const allTracks = [
@@ -183,8 +201,8 @@ export default function Home() {
             <ProgressSync />
             <XpToast />
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1.6fr]">
-              <div className="slide-l"><Dossier mission={activeMission} /></div>
-              <div className="slide-r"><SqlTerminal mission={activeMission} /></div>
+              <Dossier mission={activeMission} />
+              <SqlTerminal mission={activeMission} />
             </div>
           </div>
         )}
