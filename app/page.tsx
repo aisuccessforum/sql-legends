@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BootSequence from "@/components/boot/BootSequence";
 import StatusBar from "@/components/hud/StatusBar";
 import XpToast from "@/components/hud/XpToast";
@@ -27,7 +27,7 @@ import { staffAnalystMissions } from "@/content/staff-analyst-missions";
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 import UnlockScreen from "@/components/access/UnlockScreen";
-import { getAccess, verifyPayment } from "@/lib/access";
+import { capturePromoFromUrl, clearStoredPromo, getAccess, getStoredPromo, verifyPayment } from "@/lib/access";
 
 type AuthState = "loading" | "signed-out" | "onboarding" | "ready";
 type View = "unlock" | "hub" | "study" | "module" | "dashboard" | "mission" | "coming-soon";
@@ -45,6 +45,8 @@ export default function Home() {
   const [hasAccess, setHasAccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [payNotice, setPayNotice] = useState("");
+  const [accessLoaded, setAccessLoaded] = useState(false);
+  const promoShown = useRef(false);
 
   const seedFromProfile = useGameStore((s) => s.seedFromProfile);
   const ready = useGameStore((s) => s.ready);
@@ -72,17 +74,27 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [seedFromProfile]);
 
+  // Campaign link: remember ?code= before anything else (it must survive sign-in).
+  useEffect(() => { capturePromoFromUrl(); }, []);
+
   useEffect(() => {
     if (authState !== "ready") return;
-    getAccess().then((a) => { setHasAccess(a.hasAccess); setIsAdmin(a.isAdmin); });
+    getAccess().then((a) => { setHasAccess(a.hasAccess); setIsAdmin(a.isAdmin); setAccessLoaded(true); });
   }, [authState]);
+
+  // Signed in via a campaign link and not enrolled yet: open the payment screen with the code applied.
+  useEffect(() => {
+    if (authState !== "ready" || !accessLoaded || promoShown.current) return;
+    if (hasAccess) { clearStoredPromo(); return; }
+    if (getStoredPromo()) { promoShown.current = true; setView("unlock"); }
+  }, [authState, accessLoaded, hasAccess]);
 
   useEffect(() => {
     if (authState !== "ready") return;
     const id = new URLSearchParams(window.location.search).get("pay_order");
     if (!id) return;
     verifyPayment(id).then((r) => {
-      if (r.hasAccess) setHasAccess(true);
+      if (r.hasAccess) { setHasAccess(true); clearStoredPromo(); }
       setPayNotice(
         r.status === "PAID"
           ? "Payment received. All ranks are now unlocked."

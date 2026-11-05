@@ -69,3 +69,25 @@ export async function quotePrice(code: string): Promise<{ ok: boolean; amount?: 
     return { ok: false, error: "Network error. Please try again." };
   }
 }
+
+// ── Campaign links: https://…/?code=ASTRA-XXXX-XXXX ──
+const PROMO_KEY = "sl_promo";
+/** Remember a ?code= from the URL (it must survive the Google sign-in redirect), then tidy the address bar. */
+export function capturePromoFromUrl(): void {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const c = params.get("code");
+    if (c && /^[A-Za-z0-9-]{3,40}$/.test(c)) localStorage.setItem(PROMO_KEY, c.toUpperCase());
+    if (params.has("code")) {
+      params.delete("code");
+      const q = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (q ? `?${q}` : ""));
+    }
+  } catch { /* storage blocked: the user can still type the code */ }
+}
+export function getStoredPromo(): string {
+  try { return localStorage.getItem(PROMO_KEY) ?? ""; } catch { return ""; }
+}
+export function clearStoredPromo(): void {
+  try { localStorage.removeItem(PROMO_KEY); } catch { /* ignore */ }
+}

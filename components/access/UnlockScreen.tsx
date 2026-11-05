@@ -1,8 +1,8 @@
 "use client";
 import "@/app/spatial.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SITE, PAID_RANK_COUNT } from "@/content/site";
-import { quotePrice, redeemCode, startPayment } from "@/lib/access";
+import { getStoredPromo, quotePrice, redeemCode, startPayment } from "@/lib/access";
 
 export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => void; onUnlocked: () => void }) {
   const [code, setCode] = useState("");
@@ -10,17 +10,25 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
   const [payMsg, setPayMsg] = useState("");
   const [phone, setPhone] = useState("");
   const [codeMsg, setCodeMsg] = useState("");
-  const [disc, setDisc] = useState("");
+  const [disc, setDisc] = useState(() => (typeof window === "undefined" ? "" : getStoredPromo()));
   const [applied, setApplied] = useState<{ code: string; amount: number; pct: number } | null>(null);
   const [discMsg, setDiscMsg] = useState("");
 
-  async function applyDiscount() {
+  async function applyDiscount(value?: string) {
+    const c = (value ?? disc).trim();
     setDiscMsg("");
-    if (!disc.trim()) { setApplied(null); return; }
-    const r = await quotePrice(disc.trim());
-    if (r.ok && r.pct && r.amount) { setApplied({ code: disc.trim(), amount: r.amount, pct: r.pct }); setDiscMsg(`${r.pct}% discount applied.`); }
+    if (!c) { setApplied(null); return; }
+    const r = await quotePrice(c);
+    if (r.ok && r.pct && r.amount) { setApplied({ code: c, amount: r.amount, pct: r.pct }); setDiscMsg(`${r.pct}% discount applied.`); }
     else { setApplied(null); setDiscMsg(r.error ?? "Could not apply this code."); }
   }
+
+  // Arrived from a campaign link: apply the remembered code straight away.
+  useEffect(() => {
+    const stored = getStoredPromo();
+    if (stored) applyDiscount(stored);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function pay() {
     setBusy("pay"); setPayMsg("");
@@ -57,7 +65,7 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
           <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
             <input value={disc} onChange={(e) => { setDisc(e.target.value); setApplied(null); setDiscMsg(""); }} placeholder="Discount code (optional)" autoCapitalize="characters" spellCheck={false} aria-label="Discount code"
               style={{ flex: 1, minWidth: 0, padding: "13px 16px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "rgba(0,0,0,0.45)", color: "var(--text-hi)", fontFamily: "var(--font-mono)", fontSize: 15 }} />
-            <button type="button" onClick={applyDiscount} disabled={!disc.trim()} style={{ padding: "0 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "none", color: "var(--text-hi)", cursor: "pointer", opacity: disc.trim() ? 1 : 0.5 }}>Apply</button>
+            <button type="button" onClick={() => applyDiscount()} disabled={!disc.trim()} style={{ padding: "0 18px", borderRadius: 16, border: "1px solid var(--glass-line)", background: "none", color: "var(--text-hi)", cursor: "pointer", opacity: disc.trim() ? 1 : 0.5 }}>Apply</button>
           </div>
           {discMsg && <p style={{ fontSize: 13, marginBottom: 10, color: applied ? "var(--terminal)" : "#ffb4b8" }}>{discMsg}</p>}
           <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/[^0-9+ -]/g, ""))} inputMode="tel" placeholder="Mobile number (10 digits)" aria-label="Mobile number"
