@@ -11,7 +11,7 @@ export const SITE = {
   updated: "3 November 2026",
 };
 
-export const PAID_RANK_COUNT = 7;
+export const PAID_RANK_COUNT = 8;
 
 export const CURRICULUM = [
   { rank: "Intern", tickets: 80, free: true, focus: "SELECT · WHERE · GROUP BY · JOINs · Subqueries" },
@@ -22,4 +22,5 @@ export const CURRICULUM = [
   { rank: "Analytics Engineer", tickets: 50, focus: "CTE models · Idempotency · Tests · Incremental logic" },
   { rank: "Data Engineer", tickets: 50, focus: "ETL · Deduplication · SCD Types 1 & 2 · Pipeline health" },
   { rank: "Staff Analyst", tickets: 50, focus: "Statistics · A/B testing · Regression · Outlier detection" },
+  { rank: "Principal Analyst", tickets: 50, focus: "Cohorts · Funnels · Attribution · Forecasting · Experiments" },
 ];

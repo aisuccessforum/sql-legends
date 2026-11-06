@@ -27,6 +27,11 @@ import {
   staffAnalystMissions,
   staffAnalystUpcomingModules,
 } from "@/content/staff-analyst-missions";
+import {
+  principalAnalystMissions,
+  principalAnalystUpcomingModules,
+} from "@/content/principal-analyst-missions";
+
 import { useGameStore } from "@/store/useGameStore";
 
 type TicketStatus = "completed" | "available" | "locked";
@@ -103,6 +108,13 @@ function tracksForRank(rank: string): {
       activeMissions: staffAnalystMissions,
       activeUpcomingModules: staffAnalystUpcomingModules,
       eyebrow: "STAFF ANALYST // TICKET QUEUE",
+    };
+  }
+  if (rank === "Principal Analyst") {
+    return {
+      activeMissions: principalAnalystMissions,
+      activeUpcomingModules: principalAnalystUpcomingModules,
+      eyebrow: "PRINCIPAL ANALYST // TICKET QUEUE",
     };
   }
   return {

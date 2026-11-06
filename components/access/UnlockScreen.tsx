@@ -52,7 +52,7 @@ export default function UnlockScreen({ onBack, onUnlocked }: { onBack: () => voi
         Unlock the full career track
       </h1>
       <p style={{ fontSize: 18, lineHeight: 1.7, color: "var(--text-lo)", maxWidth: 640, marginBottom: 36 }}>
-        The Intern rank is free. The next {PAID_RANK_COUNT} ranks — Junior Data Analyst through Staff Analyst, 350 more tickets — unlock with a one-time payment or an access code.
+        The Intern rank is free. The next {PAID_RANK_COUNT} ranks — Junior Data Analyst through Principal Analyst, 400 more tickets — unlock with a one-time payment or an access code.
       </p>
       <div style={{ display: "grid", gap: 24, gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}>
         <section className="glass" style={card}>

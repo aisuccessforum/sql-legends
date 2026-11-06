@@ -19,12 +19,12 @@ const RANK_META: Record<string, { tickets: number; tagline: string }> = {
   "Analytics Engineer":   { tickets: 50, tagline: "CTE models · Idempotency · Tests · Incremental logic" },
   "Data Engineer":        { tickets: 50, tagline: "ETL · Deduplication · SCD Types 1 & 2 · Pipeline health" },
   "Staff Analyst":        { tickets: 50, tagline: "Statistics · A/B testing · Regression · Outlier detection" },
-  "Principal Analyst":    { tickets: 0,  tagline: "The senior-IC endgame — coming soon" },
+  "Principal Analyst":    { tickets: 50,  tagline: "Own the metrics, the experiments and the board pack." },
 };
 
 const NPC_BY_RANK: Record<string, string> = {};
 allRankStudy.forEach((r) => { NPC_BY_RANK[r.rank] = r.npc; });
-NPC_BY_RANK["Principal Analyst"] = "TBD";
+
 
 export default function CareerHub({ onEnterRank, onStudyRank }: Props) {
   const rank = useGameStore((s) => s.rank);
@@ -37,6 +37,7 @@ export default function CareerHub({ onEnterRank, onStudyRank }: Props) {
     "Data Analyst": "da-ticket-", "Senior Data Analyst": "sda-ticket-",
     "BI Developer": "bi-ticket-", "Analytics Engineer": "ae-ticket-",
     "Data Engineer": "de-ticket-", "Staff Analyst": "sa-ticket-",
+	"Principal Analyst": "pa-ticket-",
   };
   const prefix = prefixMap[rank] ?? "";
   const done = prefix ? completedMissions.filter((id) => id.startsWith(prefix)).length : 0;

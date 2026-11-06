@@ -1366,6 +1366,172 @@ export const allRankStudy: RankStudy[] =
         ]
       }
     ]
-  }
+  },
+  {
+  "rank": "Principal Analyst",
+  "npc": "Chief Data Officer Ishaan Verma",
+  "tagline": "Own the metrics, the experiments and the board pack.",
+  "totalTickets": 50,
+  "modules": [
+    {
+      "id": "pa-m1",
+      "num": 1,
+      "title": "Metric Design",
+      "tags": [
+        "Simpson's paradox",
+        "weighted average",
+        "ratio metrics",
+        "guardrails"
+      ],
+      "ticketRange": "PA-001 → PA-007",
+      "startIdx": 0,
+      "endIdx": 6,
+      "concept": "Principal analysts define metrics before they compute them. A pooled rate can reverse once you segment (Simpson's paradox), averages of ratios differ from ratios of sums, and every headline metric needs a guardrail metric.",
+      "syntax": "-- Ratio of sums, not average of ratios\nSELECT segment, ROUND(100.0*SUM(conversions)/SUM(visitors),1) AS rate\nFROM campaign_results GROUP BY segment;",
+      "keyPoints": [
+        "Aggregate numerator and denominator separately, then divide",
+        "Always compare pooled and segmented views before reporting a winner",
+        "Multiply by 1.0 to avoid integer division in SQLite",
+        "Define the metric in one sentence before writing any SQL"
+      ]
+    },
+    {
+      "id": "pa-m2",
+      "num": 2,
+      "title": "Cohort Retention",
+      "tags": [
+        "cohorts",
+        "retention",
+        "month offset",
+        "LAG"
+      ],
+      "ticketRange": "PA-008 → PA-015",
+      "startIdx": 7,
+      "endIdx": 14,
+      "concept": "A cohort groups users by when they started. Retention is the share of a cohort still active N periods later. Build a month-offset per user, count distinct active users per cohort and offset, then divide by cohort size.",
+      "syntax": "WITH a AS (SELECT DISTINCT u.user_id, strftime('%Y-%m',u.signup_date) AS cohort,\n  (strftime('%Y',x.activity_date)*12+strftime('%m',x.activity_date))-(strftime('%Y',u.signup_date)*12+strftime('%m',u.signup_date)) AS off\n  FROM users u JOIN activity x USING(user_id))\nSELECT cohort, off, COUNT(*) FROM a GROUP BY 1,2;",
+      "keyPoints": [
+        "Use DISTINCT so several events in a month count a user once",
+        "Divide by cohort size, not by the previous month's actives",
+        "LAG compares a cohort to its own previous period",
+        "Small cohorts make noisy percentages — show the n"
+      ]
+    },
+    {
+      "id": "pa-m3",
+      "num": 3,
+      "title": "Funnels & Conversion",
+      "tags": [
+        "funnel",
+        "step conversion",
+        "drop-off",
+        "time to convert"
+      ],
+      "ticketRange": "PA-016 → PA-022",
+      "startIdx": 15,
+      "endIdx": 21,
+      "concept": "A funnel counts distinct users reaching each ordered step. Step conversion divides a step by the one before; overall conversion divides by the first step. Always count distinct users, never raw events.",
+      "syntax": "SELECT COUNT(DISTINCT CASE WHEN event_name='visit' THEN user_id END) AS visit,\n       COUNT(DISTINCT CASE WHEN event_name='signup' THEN user_id END) AS signup\nFROM web_events;",
+      "keyPoints": [
+        "COUNT(DISTINCT CASE WHEN ...) builds a funnel in one pass",
+        "The weakest step is the lowest step conversion, not the biggest absolute drop",
+        "Time-to-convert needs MIN timestamps per user per step",
+        "Compare paths (e.g. skipped trial) to find hidden shortcuts"
+      ]
+    },
+    {
+      "id": "pa-m4",
+      "num": 4,
+      "title": "Segmentation & Attribution",
+      "tags": [
+        "RFM",
+        "NTILE",
+        "first touch",
+        "last touch",
+        "linear",
+        "CAC"
+      ],
+      "ticketRange": "PA-023 → PA-030",
+      "startIdx": 22,
+      "endIdx": 29,
+      "concept": "RFM scores customers on recency, frequency and monetary value using NTILE buckets. Attribution splits conversion revenue across touchpoints: first-touch, last-touch or linear. CAC divides spend by customers acquired.",
+      "syntax": "SELECT customer_id,\n  NTILE(4) OVER (ORDER BY recency_days DESC, customer_id) AS r\nFROM rfm;\n\n-- last touch\nROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY touch_date DESC)",
+      "keyPoints": [
+        "Reverse the recency order so recent buyers score highest",
+        "Always add a deterministic tie-breaker to NTILE",
+        "Different attribution models give different winners — state the model",
+        "Revenue-to-CAC is the fairest channel comparison"
+      ]
+    },
+    {
+      "id": "pa-m5",
+      "num": 5,
+      "title": "Seasonality & Forecasting",
+      "tags": [
+        "YoY",
+        "TTM",
+        "seasonal index",
+        "deseasonalise",
+        "run-rate"
+      ],
+      "ticketRange": "PA-031 → PA-037",
+      "startIdx": 30,
+      "endIdx": 36,
+      "concept": "Year-on-year growth cancels seasonality. Trailing-twelve-month sums smooth noise. A seasonal index (month average / overall average) lets you deseasonalise recent data and forecast the year-end from last year's shape.",
+      "syntax": "SELECT SUM(revenue) OVER (ORDER BY month ROWS BETWEEN 11 PRECEDING AND CURRENT ROW) AS ttm\nFROM monthly_sales;\n\n-- last year's month\nstrftime('%Y-%m', date(month||'-01','-1 year'))",
+      "keyPoints": [
+        "Self-join on the prior-year month for YoY",
+        "Only keep full 12-row windows for TTM",
+        "Seasonal index uses complete years only",
+        "Forecast = YTD × (prior full year ÷ prior YTD)"
+      ]
+    },
+    {
+      "id": "pa-m6",
+      "num": 6,
+      "title": "Causal Inference & Data Quality",
+      "tags": [
+        "diff-in-diff",
+        "holdout",
+        "SRM",
+        "reconciliation",
+        "anomaly"
+      ],
+      "ticketRange": "PA-038 → PA-044",
+      "startIdx": 37,
+      "endIdx": 43,
+      "concept": "Before/after comparisons mislead when everything is trending. Difference-in-differences subtracts the control's change from the treated change. Holdouts give a clean counterfactual. Check sample ratio before trusting any test; reconcile systems; flag anomalies against a trailing baseline.",
+      "syntax": "-- DiD\nSELECT AVG(CASE WHEN grp='treated' THEN chg END) - AVG(CASE WHEN grp='control' THEN chg END) FROM d;\n\n-- trailing baseline\nAVG(x) OVER (ORDER BY d ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING)",
+      "keyPoints": [
+        "Sample ratio mismatch invalidates a test before any lift is read",
+        "Week-by-week lift reveals novelty effects",
+        "Reconciliation = missing, duplicate, mismatch, orphan",
+        "Exclude today from its own anomaly baseline"
+      ]
+    },
+    {
+      "id": "pa-m7",
+      "num": 7,
+      "title": "Principal Analyst Capstone",
+      "tags": [
+        "scorecard",
+        "cohort revenue",
+        "experiment readout",
+        "board pack"
+      ],
+      "ticketRange": "PA-045 → PA-050",
+      "startIdx": 44,
+      "endIdx": 49,
+      "concept": "The capstone combines everything: channel scorecards, revenue retention, time-boxed conversion, expectation vs actual, a full experiment readout (trust, lift, durability) and a nine-metric board pack from five systems.",
+      "syntax": "SELECT (SELECT COUNT(*) FROM users) AS total_users,\n       (SELECT SUM(amount) FROM orders) AS total_revenue,\n       ...;",
+      "keyPoints": [
+        "Independent scalar subqueries avoid fan-out joins",
+        "UNION (not UNION ALL) de-duplicates multi-issue invoices",
+        "Run the trust check first, the lift second",
+        "PA-050 is the hardest ticket in the platform"
+      ]
+    }
+  ]
+}
 ]
 ;

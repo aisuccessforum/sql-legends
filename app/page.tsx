@@ -24,6 +24,9 @@ import { biDeveloperMissions } from "@/content/bi-developer-missions";
 import { analyticsEngineerMissions } from "@/content/analytics-engineer-missions";
 import { dataEngineerMissions } from "@/content/data-engineer-missions";
 import { staffAnalystMissions } from "@/content/staff-analyst-missions";
+import { principalAnalystMissions } from "@/content/principal-analyst-missions";
+
+
 import { useGameStore } from "@/store/useGameStore";
 import { getProfile, type PlayerProfile } from "@/lib/api";
 import UnlockScreen from "@/components/access/UnlockScreen";
@@ -201,7 +204,7 @@ export default function Home() {
               const isDone = completedMissions.includes(activeMission.id);
               const allTracks = [
                 missions, juniorMissions, dataAnalystMissions, seniorAnalystMissions,
-                biDeveloperMissions, analyticsEngineerMissions, dataEngineerMissions, staffAnalystMissions,
+                biDeveloperMissions, analyticsEngineerMissions, dataEngineerMissions, staffAnalystMissions,principalAnalystMissions,
               ];
               const track = allTracks.find((t) => t.some((m) => m.id === activeMission.id)) ?? missions;
               const activeIndex = track.findIndex((m) => m.id === activeMission.id);
